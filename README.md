@@ -32,7 +32,7 @@ python backend.py
 The server listens on `http://localhost:5000` and exposes endpoints for validating API keys and evaluating interviews.
 
 ## Using the front-end
-1. Open the `interview.html` file in a browser.
+1. Open the `interview.html` file in a browser. When loaded directly via `file://`, the page automatically targets the backend at `http://localhost:5000`, so make sure the Flask server is running first.
 2. Seçmek istediğiniz değerlendirme modunu kartlardan işaretleyin (TOEFL, IELTS, Business veya Casual).
 3. If prompted, save a valid Anthropic API key.
 4. Paste an interview transcript and click **Evaluate Interview** to receive mode-specific feedback.
