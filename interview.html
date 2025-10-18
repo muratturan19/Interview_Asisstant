@@ -1,1 +1,433 @@
-<!-- Temporary placeholder for voice interview assistant interface -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interview English Evaluator</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f172a;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(148, 163, 184, 0.2);
+      --primary: #38bdf8;
+      --accent: #c084fc;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --success: #34d399;
+      --danger: #f87171;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1e293b, #020617 55%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+    }
+
+    .container {
+      width: min(960px, 100%);
+      backdrop-filter: blur(18px);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 32px clamp(20px, 4vw, 48px);
+      box-shadow: 0 30px 80px -40px rgba(56, 189, 248, 0.65);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: -0.04em;
+    }
+
+    p.subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.1rem);
+    }
+
+    section {
+      margin-top: 32px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.55);
+      color: inherit;
+      font-size: 1rem;
+      padding: 14px 18px;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+    }
+
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #0f172a;
+      box-shadow: 0 18px 35px -18px rgba(56, 189, 248, 0.7);
+    }
+
+    button.secondary {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: none;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    button:not(:disabled):hover {
+      transform: translateY(-1px);
+    }
+
+    .status {
+      margin-top: 16px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status.success {
+      color: var(--success);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .results {
+      margin-top: 24px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .score-card {
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .score-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .score-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .json-output {
+      background: rgba(2, 6, 23, 0.65);
+      border-radius: 16px;
+      padding: 16px;
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 32px 12px;
+      }
+
+      .container {
+        padding: 24px;
+      }
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Interview English Evaluator</h1>
+      <p class="subtitle">Validate your Anthropic API key, paste an interview transcript, and get instant English proficiency feedback.</p>
+    </header>
+
+    <section aria-labelledby="api-key-title">
+      <h2 id="api-key-title">1. Connect Your Anthropic Account</h2>
+      <label for="api-key-input">Anthropic API Key</label>
+      <input id="api-key-input" type="password" placeholder="sk-ant-..." autocomplete="off" />
+      <div class="actions">
+        <button id="validate-btn" type="button">Validate Key</button>
+        <button id="toggle-visibility" class="secondary" type="button">Show</button>
+      </div>
+      <p id="validation-status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section aria-labelledby="transcript-title">
+      <h2 id="transcript-title">2. Paste Interview Transcript</h2>
+      <label for="transcript-input">Transcript</label>
+      <textarea id="transcript-input" placeholder="Paste the interviewer and candidate conversation here..."></textarea>
+      <div class="actions">
+        <button id="evaluate-btn" type="button">Evaluate Interview</button>
+        <button id="clear-btn" class="secondary" type="button">Clear</button>
+      </div>
+      <p id="evaluation-status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section aria-labelledby="results-title">
+      <h2 id="results-title">3. Evaluation Results</h2>
+      <div id="results" class="results" hidden>
+        <div class="score-grid" id="score-grid"></div>
+        <div>
+          <h3>Strengths</h3>
+          <ul id="strengths-list"></ul>
+        </div>
+        <div>
+          <h3>Areas for Improvement</h3>
+          <ul id="improvements-list"></ul>
+        </div>
+        <div>
+          <h3>Detailed Feedback</h3>
+          <p id="feedback"></p>
+        </div>
+        <div>
+          <h3>Raw JSON</h3>
+          <pre id="json-output" class="json-output"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = window.location.origin.includes('localhost')
+      ? 'http://localhost:5000'
+      : window.location.origin;
+
+    const apiKeyInput = document.getElementById('api-key-input');
+    const validateBtn = document.getElementById('validate-btn');
+    const toggleVisibilityBtn = document.getElementById('toggle-visibility');
+    const validationStatus = document.getElementById('validation-status');
+
+    const transcriptInput = document.getElementById('transcript-input');
+    const evaluateBtn = document.getElementById('evaluate-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const evaluationStatus = document.getElementById('evaluation-status');
+
+    const resultsWrapper = document.getElementById('results');
+    const scoreGrid = document.getElementById('score-grid');
+    const strengthsList = document.getElementById('strengths-list');
+    const improvementsList = document.getElementById('improvements-list');
+    const feedbackParagraph = document.getElementById('feedback');
+    const jsonOutput = document.getElementById('json-output');
+
+    const toggleStatus = (element, type, message) => {
+      element.textContent = message || '';
+      element.className = `status ${type || ''}`.trim();
+    };
+
+    const renderList = (listElement, items) => {
+      listElement.innerHTML = '';
+      if (!Array.isArray(items) || !items.length) {
+        const li = document.createElement('li');
+        li.textContent = 'No data available.';
+        listElement.appendChild(li);
+        return;
+      }
+
+      for (const item of items) {
+        const li = document.createElement('li');
+        li.textContent = item;
+        listElement.appendChild(li);
+      }
+    };
+
+    const renderScores = (data) => {
+      scoreGrid.innerHTML = '';
+      const fields = ['grammar', 'vocabulary', 'fluency', 'comprehension', 'overall'];
+      for (const field of fields) {
+        if (typeof data[field] === 'undefined') continue;
+        const card = document.createElement('article');
+        card.className = 'score-card';
+        card.innerHTML = `
+          <h3>${field}</h3>
+          <div class="score-value">${data[field]}</div>
+        `;
+        scoreGrid.appendChild(card);
+      }
+
+      if (data.level) {
+        const levelCard = document.createElement('article');
+        levelCard.className = 'score-card';
+        levelCard.innerHTML = `
+          <h3>Level</h3>
+          <div class="score-value">${data.level}</div>
+        `;
+        scoreGrid.appendChild(levelCard);
+      }
+    };
+
+    const handleValidate = async () => {
+      const apiKey = apiKeyInput.value.trim();
+      if (!apiKey) {
+        toggleStatus(validationStatus, 'error', 'Please enter an Anthropic API key first.');
+        return;
+      }
+
+      toggleStatus(validationStatus, '', 'Validating key...');
+      validateBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/validate-key`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ api_key: apiKey }),
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.valid) {
+          throw new Error(result.error || 'Validation failed');
+        }
+
+        toggleStatus(validationStatus, 'success', 'API key validated successfully.');
+      } catch (error) {
+        toggleStatus(validationStatus, 'error', error.message || 'Unable to validate API key.');
+      } finally {
+        validateBtn.disabled = false;
+      }
+    };
+
+    const handleEvaluate = async () => {
+      const apiKey = apiKeyInput.value.trim();
+      const transcript = transcriptInput.value.trim();
+
+      if (!apiKey) {
+        toggleStatus(validationStatus, 'error', 'Please enter an Anthropic API key.');
+        apiKeyInput.focus();
+        return;
+      }
+
+      if (!transcript) {
+        toggleStatus(evaluationStatus, 'error', 'Transcript is required for evaluation.');
+        transcriptInput.focus();
+        return;
+      }
+
+      toggleStatus(evaluationStatus, '', 'Evaluating interview...');
+      evaluateBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/evaluate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ api_key: apiKey, transcript }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || 'Evaluation failed');
+        }
+
+        renderScores(result);
+        renderList(strengthsList, result.strengths);
+        renderList(improvementsList, result.improvements);
+        feedbackParagraph.textContent = result.detailed_feedback || 'No feedback provided.';
+        jsonOutput.textContent = JSON.stringify(result, null, 2);
+        resultsWrapper.hidden = false;
+        toggleStatus(evaluationStatus, 'success', 'Evaluation complete.');
+      } catch (error) {
+        toggleStatus(evaluationStatus, 'error', error.message || 'Unable to complete evaluation.');
+      } finally {
+        evaluateBtn.disabled = false;
+      }
+    };
+
+    const handleClear = () => {
+      transcriptInput.value = '';
+      resultsWrapper.hidden = true;
+      scoreGrid.innerHTML = '';
+      strengthsList.innerHTML = '';
+      improvementsList.innerHTML = '';
+      feedbackParagraph.textContent = '';
+      jsonOutput.textContent = '';
+      toggleStatus(evaluationStatus, '', '');
+    };
+
+    const handleToggleVisibility = () => {
+      const isPassword = apiKeyInput.type === 'password';
+      apiKeyInput.type = isPassword ? 'text' : 'password';
+      toggleVisibilityBtn.textContent = isPassword ? 'Hide' : 'Show';
+    };
+
+    validateBtn.addEventListener('click', handleValidate);
+    evaluateBtn.addEventListener('click', handleEvaluate);
+    clearBtn.addEventListener('click', handleClear);
+    toggleVisibilityBtn.addEventListener('click', handleToggleVisibility);
+  </script>
+</body>
+</html>
