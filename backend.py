@@ -6,6 +6,8 @@ import os
 import json
 import logging
 import re
+import importlib.util
+import sys
 from pathlib import Path
 
 VALID_MODES = {"toefl", "ielts", "business", "casual"}
@@ -15,6 +17,34 @@ LAST_MODE_KEY = "LAST_EVALUATION_MODE"
 
 ENV_KEY_NAME = "ANTHROPIC_API_KEY"
 ENV_PATH = Path(__file__).resolve().parent / ".env"
+
+
+def _register_config_module() -> None:
+    """Expose the configuration package under the ``backend`` namespace."""
+
+    configs_path = Path(__file__).resolve().parent / "backend" / "configs" / "__init__.py"
+    module_name = "backend.configs"
+
+    if module_name in sys.modules:
+        return
+
+    if not configs_path.exists():  # pragma: no cover - defensive safeguard
+        return
+
+    spec = importlib.util.spec_from_file_location(module_name, configs_path)
+    if not spec or not spec.loader:
+        raise ImportError(f"Unable to load configuration module from {configs_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    sys.modules[module_name] = module
+    setattr(sys.modules[__name__], "configs", module)
+
+    if hasattr(module, "ConfigManager"):
+        setattr(sys.modules[__name__], "ConfigManager", module.ConfigManager)
+
+
+_register_config_module()
 
 
 TOEFL_SYSTEM = """You are a certified TOEFL iBT Speaking examiner with 15+ years of experience.
