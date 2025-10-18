@@ -40,6 +40,113 @@
       box-shadow: 0 30px 80px -40px rgba(56, 189, 248, 0.65);
     }
 
+    .evaluation-mode-selection {
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.5);
+      margin-top: 24px;
+    }
+
+    .evaluation-mode-selection .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .mode-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .mode-card {
+      position: relative;
+      display: block;
+      --mode-color: var(--primary);
+    }
+
+    .mode-card input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mode-card .card-content {
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(15, 23, 42, 0.4);
+      transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+      min-height: 120px;
+    }
+
+    .mode-card .card-content h4 {
+      margin: 0 0 6px;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-card .card-content p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .mode-card:hover .card-content {
+      transform: translateY(-2px);
+    }
+
+    .mode-card input:focus-visible + .card-content {
+      outline: 2px solid var(--mode-color);
+      outline-offset: 4px;
+    }
+
+    .mode-card input:checked + .card-content {
+      border: 1px solid var(--mode-color);
+      transform: translateY(-2px);
+    }
+
+    .mode-card.toefl {
+      --mode-color: #38bdf8;
+    }
+
+    .mode-card.toefl input:checked + .card-content {
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow: 0 16px 36px -24px rgba(56, 189, 248, 0.75);
+    }
+
+    .mode-card.ielts {
+      --mode-color: #facc15;
+    }
+
+    .mode-card.ielts input:checked + .card-content {
+      background: rgba(250, 204, 21, 0.1);
+      box-shadow: 0 16px 36px -24px rgba(250, 204, 21, 0.7);
+    }
+
+    .mode-card.business {
+      --mode-color: #f97316;
+    }
+
+    .mode-card.business input:checked + .card-content {
+      background: rgba(249, 115, 22, 0.12);
+      box-shadow: 0 16px 36px -24px rgba(249, 115, 22, 0.7);
+    }
+
+    .mode-card.casual {
+      --mode-color: #a855f7;
+    }
+
+    .mode-card.casual input:checked + .card-content {
+      background: rgba(168, 85, 247, 0.14);
+      box-shadow: 0 16px 36px -24px rgba(168, 85, 247, 0.7);
+    }
+
     h1 {
       margin-top: 0;
       font-size: clamp(2rem, 4vw, 3rem);
@@ -146,6 +253,54 @@
       gap: 18px;
     }
 
+    .mode-overview {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mode-description {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .mode-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 8px 16px;
+      border: 1px solid transparent;
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--text);
+      width: fit-content;
+    }
+
+    .mode-chip[data-mode="toefl"] {
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+    }
+
+    .mode-chip[data-mode="ielts"] {
+      border-color: rgba(250, 204, 21, 0.35);
+      background: rgba(250, 204, 21, 0.15);
+      color: #facc15;
+    }
+
+    .mode-chip[data-mode="business"] {
+      border-color: rgba(249, 115, 22, 0.35);
+      background: rgba(249, 115, 22, 0.16);
+      color: #f97316;
+    }
+
+    .mode-chip[data-mode="casual"] {
+      border-color: rgba(168, 85, 247, 0.35);
+      background: rgba(168, 85, 247, 0.18);
+      color: #c4b5fd;
+    }
+
     .score-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -172,6 +327,27 @@
       font-weight: 700;
     }
 
+    .score-subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .results-section {
+      border-top: 1px solid rgba(148, 163, 184, 0.15);
+      padding-top: 12px;
+    }
+
+    .results-section h3 {
+      margin-top: 0;
+    }
+
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
     ul {
       margin: 0;
       padding-left: 18px;
@@ -196,6 +372,10 @@
         padding: 24px;
       }
 
+      .mode-cards {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+
       button {
         width: 100%;
         justify-content: center;
@@ -214,13 +394,52 @@
       <p class="subtitle">Validate your Anthropic API key, paste an interview transcript, and get instant English proficiency feedback.</p>
     </header>
 
+    <div class="evaluation-mode-selection" aria-labelledby="evaluation-mode-title">
+      <h3 id="evaluation-mode-title">📊 Değerlendirme Standardı</h3>
+      <p class="subtitle">Hangi standarda göre değerlendirilmek istersiniz?</p>
+
+      <div class="mode-cards">
+        <label class="mode-card toefl">
+          <input type="radio" name="eval-mode" value="toefl" checked>
+          <div class="card-content">
+            <h4>🎓 TOEFL Speaking</h4>
+            <p>Akademik İngilizce (0-30 puan)</p>
+          </div>
+        </label>
+
+        <label class="mode-card ielts">
+          <input type="radio" name="eval-mode" value="ielts">
+          <div class="card-content">
+            <h4>🇬🇧 IELTS Speaking</h4>
+            <p>British English (0-9 band)</p>
+          </div>
+        </label>
+
+        <label class="mode-card business">
+          <input type="radio" name="eval-mode" value="business">
+          <div class="card-content">
+            <h4>💼 Business English</h4>
+            <p>Profesyonel İletişim (0-100)</p>
+          </div>
+        </label>
+
+        <label class="mode-card casual">
+          <input type="radio" name="eval-mode" value="casual">
+          <div class="card-content">
+            <h4>💬 Casual Conversation</h4>
+            <p>Günlük Konuşma (0-100)</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
     <section id="api-key-section" aria-labelledby="api-key-title">
       <h2 id="api-key-title">1. Connect Your Anthropic Account</h2>
       <label for="api-key-input">Anthropic API Key</label>
       <input id="api-key-input" type="password" placeholder="sk-ant-..." autocomplete="off" />
       <div class="actions">
         <button id="save-btn" type="button">Save API Key</button>
-        <button id="toggle-visibility" class="secondary" type="button">Show</button>
+        <button id="toggle-visibility" class="secondary" type="button">Göster</button>
       </div>
       <p id="validation-status" class="status" role="status" aria-live="polite"></p>
     </section>
@@ -239,7 +458,32 @@
     <section aria-labelledby="results-title">
       <h2 id="results-title">3. Evaluation Results</h2>
       <div id="results" class="results" hidden>
+        <div class="mode-overview" id="mode-overview" hidden>
+          <span id="mode-chip" class="mode-chip"></span>
+          <p id="mode-description" class="mode-description"></p>
+        </div>
         <div class="score-grid" id="score-grid"></div>
+        <div id="equivalents-section" class="results-section" hidden>
+          <h3>Equivalent Scores</h3>
+          <ul id="equivalents-list"></ul>
+        </div>
+        <div id="question-breakdown-section" class="results-section" hidden>
+          <h3>Question Breakdown</h3>
+          <div id="question-breakdown" class="score-grid"></div>
+        </div>
+        <div id="examples-section" class="results-section" hidden>
+          <h3>Specific Examples</h3>
+          <div class="examples-grid">
+            <div>
+              <h4>Strong Examples</h4>
+              <ul id="examples-good"></ul>
+            </div>
+            <div>
+              <h4>Needs Work</h4>
+              <ul id="examples-needs"></ul>
+            </div>
+          </div>
+        </div>
         <div>
           <h3>Strengths</h3>
           <ul id="strengths-list"></ul>
@@ -282,6 +526,48 @@
     const improvementsList = document.getElementById('improvements-list');
     const feedbackParagraph = document.getElementById('feedback');
     const jsonOutput = document.getElementById('json-output');
+    const modeOverview = document.getElementById('mode-overview');
+    const modeChip = document.getElementById('mode-chip');
+    const modeDescription = document.getElementById('mode-description');
+    const equivalentsSection = document.getElementById('equivalents-section');
+    const equivalentsList = document.getElementById('equivalents-list');
+    const questionBreakdownSection = document.getElementById('question-breakdown-section');
+    const questionBreakdownGrid = document.getElementById('question-breakdown');
+    const examplesSection = document.getElementById('examples-section');
+    const examplesGoodList = document.getElementById('examples-good');
+    const examplesNeedsList = document.getElementById('examples-needs');
+    const evaluationModeInputs = document.querySelectorAll('input[name="eval-mode"]');
+
+    const MODE_META = {
+      toefl: {
+        label: '🎓 TOEFL Speaking',
+        description: 'Akademik İngilizce değerlendirmesi (0-30 puan)',
+        chip: 'toefl',
+        scaleMax: 30,
+        overallLabel: 'Toplam Puan'
+      },
+      ielts: {
+        label: '🇬🇧 IELTS Speaking',
+        description: 'British/International English değerlendirmesi (Band 0-9)',
+        chip: 'ielts',
+        scaleMax: 9,
+        overallLabel: 'Overall Band'
+      },
+      business: {
+        label: '💼 Business English',
+        description: 'Kurumsal iletişim ve profesyonel İngilizce (0-100)',
+        chip: 'business',
+        scaleMax: 100,
+        overallLabel: 'Genel Skor'
+      },
+      casual: {
+        label: '💬 Casual Conversation',
+        description: 'Günlük konuşma ve doğal akıcılık değerlendirmesi (0-100)',
+        chip: 'casual',
+        scaleMax: 100,
+        overallLabel: 'Genel Skor'
+      }
+    };
 
     let hasStoredApiKey = false;
 
@@ -290,13 +576,18 @@
       element.className = `status ${type || ''}`.trim();
     };
 
-    const renderList = (listElement, items) => {
+    const renderList = (listElement, items, options = {}) => {
+      const { emptyMessage = 'Veri bulunamadı.', hideWhenEmpty = false } = options;
       listElement.innerHTML = '';
+
       if (!Array.isArray(items) || !items.length) {
+        if (hideWhenEmpty) {
+          return false;
+        }
         const li = document.createElement('li');
-        li.textContent = 'No data available.';
+        li.textContent = emptyMessage;
         listElement.appendChild(li);
-        return;
+        return false;
       }
 
       for (const item of items) {
@@ -304,43 +595,240 @@
         li.textContent = item;
         listElement.appendChild(li);
       }
+
+      return true;
     };
 
-    const renderScores = (data) => {
-      scoreGrid.innerHTML = '';
-      const fields = ['grammar', 'vocabulary', 'fluency', 'comprehension', 'overall'];
-      for (const field of fields) {
-        if (typeof data[field] === 'undefined') continue;
-        const card = document.createElement('article');
-        card.className = 'score-card';
-        card.innerHTML = `
-          <h3>${field}</h3>
-          <div class="score-value">${data[field]}</div>
-        `;
-        scoreGrid.appendChild(card);
+    const formatNumber = (value) => {
+      if (typeof value !== 'number' || Number.isNaN(value)) {
+        return null;
+      }
+      return Number.isInteger(value) ? value.toString() : value.toFixed(1);
+    };
+
+    const formatScoreValue = (value, maxScore) => {
+      if (typeof value === 'number' && !Number.isNaN(value)) {
+        const formatted = formatNumber(value);
+        return maxScore ? `${formatted}/${maxScore}` : formatted;
+      }
+      if (typeof value === 'string' && value.trim()) {
+        return value;
+      }
+      return '—';
+    };
+
+    const formatLabel = (label) => {
+      if (!label) return '';
+      const title = label
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+      return title
+        .replace('Ielts', 'IELTS')
+        .replace('Toefl', 'TOEFL');
+    };
+
+    const createCard = (title, value, subtitle) => {
+      const card = document.createElement('article');
+      card.className = 'score-card';
+
+      const heading = document.createElement('h3');
+      heading.textContent = title;
+
+      const valueElement = document.createElement('div');
+      valueElement.className = 'score-value';
+      valueElement.textContent = value ?? '—';
+
+      card.appendChild(heading);
+      card.appendChild(valueElement);
+
+      if (subtitle) {
+        const subtitleElement = document.createElement('p');
+        subtitleElement.className = 'score-subtitle';
+        subtitleElement.textContent = subtitle;
+        card.appendChild(subtitleElement);
       }
 
-      if (data.level) {
-        const levelCard = document.createElement('article');
-        levelCard.className = 'score-card';
-        levelCard.innerHTML = `
-          <h3>Level</h3>
-          <div class="score-value">${data.level}</div>
-        `;
-        scoreGrid.appendChild(levelCard);
+      return card;
+    };
+
+    const updateModeOverview = (mode) => {
+      const meta = MODE_META[mode] || MODE_META.toefl;
+      modeChip.textContent = meta.label;
+      modeChip.dataset.mode = meta.chip;
+      modeDescription.textContent = meta.description;
+      modeOverview.hidden = false;
+    };
+
+    const renderEquivalents = (equivalents) => {
+      equivalentsList.innerHTML = '';
+      if (!equivalents || typeof equivalents !== 'object') {
+        equivalentsSection.hidden = true;
+        return;
       }
+
+      const entries = Object.entries(equivalents).filter(([, value]) => value !== null && value !== undefined && value !== '');
+      if (!entries.length) {
+        equivalentsSection.hidden = true;
+        return;
+      }
+
+      for (const [key, value] of entries) {
+        const li = document.createElement('li');
+        const strong = document.createElement('strong');
+        strong.textContent = `${formatLabel(key)}: `;
+        const span = document.createElement('span');
+        span.textContent = typeof value === 'number' ? formatNumber(value) ?? value : value;
+        li.append(strong, span);
+        equivalentsList.appendChild(li);
+      }
+
+      equivalentsSection.hidden = false;
+    };
+
+    const renderQuestionBreakdown = (breakdown) => {
+      questionBreakdownGrid.innerHTML = '';
+      if (!Array.isArray(breakdown) || !breakdown.length) {
+        questionBreakdownSection.hidden = true;
+        return;
+      }
+
+      breakdown.forEach((item, index) => {
+        const card = document.createElement('article');
+        card.className = 'score-card';
+
+        const heading = document.createElement('h3');
+        const label = item?.label || `Question ${item?.question_number ?? index + 1}`;
+        heading.textContent = label;
+
+        const valueElement = document.createElement('div');
+        valueElement.className = 'score-value';
+        valueElement.textContent = formatScoreValue(item?.score ?? item?.band, item?.max_score);
+
+        card.appendChild(heading);
+        card.appendChild(valueElement);
+
+        if (item?.feedback) {
+          const feedback = document.createElement('p');
+          feedback.className = 'score-subtitle';
+          feedback.textContent = item.feedback;
+          card.appendChild(feedback);
+        }
+
+        questionBreakdownGrid.appendChild(card);
+      });
+
+      questionBreakdownSection.hidden = false;
+    };
+
+    const renderExamples = (examples) => {
+      const hasGood = renderList(examplesGoodList, examples?.good, { hideWhenEmpty: true });
+      const hasNeeds = renderList(examplesNeedsList, examples?.needs_work, { hideWhenEmpty: true });
+      if (!hasGood && !hasNeeds) {
+        examplesSection.hidden = true;
+        return;
+      }
+
+      if (!hasGood) {
+        examplesGoodList.innerHTML = '';
+      }
+      if (!hasNeeds) {
+        examplesNeedsList.innerHTML = '';
+      }
+
+      examplesSection.hidden = false;
+    };
+
+    const renderSummaryCards = (result, mode) => {
+      scoreGrid.innerHTML = '';
+      const meta = MODE_META[mode] || MODE_META.toefl;
+      const addCard = (title, value, subtitle) => {
+        scoreGrid.appendChild(createCard(title, value, subtitle));
+      };
+
+      if (result.overall_score !== undefined || result.overall !== undefined) {
+        const overallValue = result.overall_score ?? result.overall;
+        const subtitle = result.overall_scale ? `Skala: ${result.overall_scale}` : undefined;
+        addCard(meta.overallLabel, formatScoreValue(overallValue, meta.scaleMax), subtitle);
+      }
+
+      if (result.cefr_level) {
+        addCard('CEFR', result.cefr_level);
+      }
+
+      const criteria = result.criterion_scores;
+      if (criteria && typeof criteria === 'object') {
+        for (const [key, value] of Object.entries(criteria)) {
+          if (value === null || value === undefined) continue;
+          const scoreValue = typeof value === 'object' && value !== null ? value.score ?? value.band ?? value.value : value;
+          const maxScore = typeof value === 'object' && value !== null ? value.max_score : undefined;
+          const weight = typeof value === 'object' && value !== null && value.weight ? `Ağırlık: ${(value.weight * 100).toFixed(0)}%` : undefined;
+          addCard(formatLabel(key), formatScoreValue(scoreValue, maxScore), weight);
+        }
+      }
+
+      if (mode === 'business') {
+        if (result.professional_level) {
+          addCard('Profesyonel Seviye', result.professional_level);
+        }
+        if (Array.isArray(result.recommended_roles) && result.recommended_roles.length) {
+          const [primary, ...rest] = result.recommended_roles;
+          const subtitle = rest.length ? `Alternatifler: ${rest.join(', ')}` : undefined;
+          addCard('Önerilen Pozisyon', primary, subtitle);
+        }
+      }
+
+      if (mode === 'casual') {
+        if (typeof result.native_likeness === 'number') {
+          addCard('Native-likeness', formatScoreValue(result.native_likeness, 100));
+        }
+        if (Array.isArray(result.idiom_examples) && result.idiom_examples.length) {
+          const subtitle = result.idiom_examples.join(', ');
+          const value = `${result.idiom_examples.length} örnek`;
+          addCard('Idioms & Slang', value, subtitle);
+        }
+      }
+    };
+
+    const getSelectedMode = () => {
+      const selected = document.querySelector('input[name="eval-mode"]:checked');
+      return selected ? selected.value : 'toefl';
+    };
+
+    const setModeSelection = (mode) => {
+      const target = Array.from(evaluationModeInputs).find((input) => input.value === mode);
+      if (target) {
+        target.checked = true;
+      }
+    };
+
+    const renderEvaluation = (result) => {
+      const mode = (result.mode || getSelectedMode()).toLowerCase();
+      updateModeOverview(mode);
+      renderSummaryCards(result, mode);
+      renderEquivalents(result.equivalent_scores);
+      renderQuestionBreakdown(result.question_breakdown);
+      renderExamples(result.specific_examples);
+      renderList(strengthsList, result.strengths);
+      renderList(improvementsList, result.improvements);
+      feedbackParagraph.textContent = result.detailed_feedback || 'Detaylı geribildirim sağlanmadı.';
+      jsonOutput.textContent = JSON.stringify(result, null, 2);
+      resultsWrapper.hidden = false;
     };
 
     const checkApiKeyStatus = async () => {
       try {
         const response = await fetch(`${API_BASE}/api/api-key-status`);
         if (!response.ok) {
-          throw new Error('Unable to check API key status.');
+          throw new Error('API anahtarı durumu kontrol edilemedi.');
         }
 
         const result = await response.json();
         hasStoredApiKey = Boolean(result.has_key);
         apiKeySection.hidden = hasStoredApiKey;
+
+        if (result.last_mode) {
+          setModeSelection(result.last_mode);
+        }
 
         if (hasStoredApiKey) {
           apiKeyInput.value = '';
@@ -354,11 +842,11 @@
     const handleSave = async () => {
       const apiKey = apiKeyInput.value.trim();
       if (!apiKey) {
-        toggleStatus(validationStatus, 'error', 'Please enter an Anthropic API key first.');
+        toggleStatus(validationStatus, 'error', 'Lütfen önce bir Anthropic API anahtarı girin.');
         return;
       }
 
-      toggleStatus(validationStatus, '', 'Validating and saving key...');
+      toggleStatus(validationStatus, '', 'Anahtar doğrulanıyor ve kaydediliyor...');
       saveBtn.disabled = true;
       toggleVisibilityBtn.disabled = true;
 
@@ -373,14 +861,14 @@
 
         const result = await response.json();
         if (!response.ok || !result.saved) {
-          throw new Error(result.error || 'Validation failed');
+          throw new Error(result.error || 'Doğrulama başarısız oldu');
         }
 
-        toggleStatus(validationStatus, 'success', 'API key saved successfully.');
+        toggleStatus(validationStatus, 'success', 'API anahtarı başarıyla kaydedildi.');
         hasStoredApiKey = true;
         apiKeySection.hidden = true;
       } catch (error) {
-        toggleStatus(validationStatus, 'error', error.message || 'Unable to validate API key.');
+        toggleStatus(validationStatus, 'error', error.message || 'API anahtarı doğrulanamadı.');
       } finally {
         saveBtn.disabled = false;
         toggleVisibilityBtn.disabled = false;
@@ -392,22 +880,22 @@
       const transcript = transcriptInput.value.trim();
 
       if (!hasStoredApiKey && !apiKey) {
-        toggleStatus(validationStatus, 'error', 'Please enter an Anthropic API key.');
+        toggleStatus(validationStatus, 'error', 'Lütfen bir Anthropic API anahtarı girin.');
         apiKeyInput.focus();
         return;
       }
 
       if (!transcript) {
-        toggleStatus(evaluationStatus, 'error', 'Transcript is required for evaluation.');
+        toggleStatus(evaluationStatus, 'error', 'Değerlendirme için transcript gerekiyor.');
         transcriptInput.focus();
         return;
       }
 
-      toggleStatus(evaluationStatus, '', 'Evaluating interview...');
+      toggleStatus(evaluationStatus, '', 'Mülakat değerlendiriliyor...');
       evaluateBtn.disabled = true;
 
       try {
-        const payload = { transcript };
+        const payload = { transcript, evaluation_mode: getSelectedMode() };
         if (!hasStoredApiKey) {
           payload.api_key = apiKey;
         }
@@ -422,18 +910,17 @@
 
         const result = await response.json();
         if (!response.ok) {
-          throw new Error(result.error || 'Evaluation failed');
+          throw new Error(result.error || 'Değerlendirme başarısız oldu');
         }
 
-        renderScores(result);
-        renderList(strengthsList, result.strengths);
-        renderList(improvementsList, result.improvements);
-        feedbackParagraph.textContent = result.detailed_feedback || 'No feedback provided.';
-        jsonOutput.textContent = JSON.stringify(result, null, 2);
-        resultsWrapper.hidden = false;
-        toggleStatus(evaluationStatus, 'success', 'Evaluation complete.');
+        if (result.mode) {
+          setModeSelection(result.mode.toLowerCase());
+        }
+
+        renderEvaluation(result);
+        toggleStatus(evaluationStatus, 'success', 'Değerlendirme tamamlandı.');
       } catch (error) {
-        toggleStatus(evaluationStatus, 'error', error.message || 'Unable to complete evaluation.');
+        toggleStatus(evaluationStatus, 'error', error.message || 'Değerlendirme tamamlanamadı.');
       } finally {
         evaluateBtn.disabled = false;
       }
@@ -447,19 +934,33 @@
       improvementsList.innerHTML = '';
       feedbackParagraph.textContent = '';
       jsonOutput.textContent = '';
+      modeOverview.hidden = true;
+      modeChip.textContent = '';
+      modeChip.dataset.mode = '';
+      modeDescription.textContent = '';
+      equivalentsSection.hidden = true;
+      equivalentsList.innerHTML = '';
+      questionBreakdownSection.hidden = true;
+      questionBreakdownGrid.innerHTML = '';
+      examplesSection.hidden = true;
+      examplesGoodList.innerHTML = '';
+      examplesNeedsList.innerHTML = '';
       toggleStatus(evaluationStatus, '', '');
     };
 
     const handleToggleVisibility = () => {
       const isPassword = apiKeyInput.type === 'password';
       apiKeyInput.type = isPassword ? 'text' : 'password';
-      toggleVisibilityBtn.textContent = isPassword ? 'Hide' : 'Show';
+      toggleVisibilityBtn.textContent = isPassword ? 'Gizle' : 'Göster';
     };
 
     saveBtn.addEventListener('click', handleSave);
     evaluateBtn.addEventListener('click', handleEvaluate);
     clearBtn.addEventListener('click', handleClear);
     toggleVisibilityBtn.addEventListener('click', handleToggleVisibility);
+    evaluationModeInputs.forEach((input) => {
+      input.addEventListener('change', () => toggleStatus(evaluationStatus, '', ''));
+    });
     checkApiKeyStatus();
   </script>
 </body>
