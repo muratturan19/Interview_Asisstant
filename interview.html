@@ -716,7 +716,7 @@
 
     let hasStoredApiKey = false;
     let recognition;
-    let audioStream = null;
+    let microphonePermissionGranted = false;
     let isListening = false;
     let listeningEnabled = false;
     let recognitionCaptured = false;
@@ -1081,13 +1081,13 @@
     };
 
     const ensureMicrophone = async () => {
-      if (audioStream) {
+      if (microphonePermissionGranted) {
         return;
       }
 
-      audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioStream.getTracks().forEach((track) => track.stop());
-      audioStream = null;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      microphonePermissionGranted = true;
     };
 
     function handleRecognitionResult(event) {
@@ -1178,7 +1178,9 @@
       }
 
       try {
-        await ensureMicrophone();
+        if (!microphonePermissionGranted) {
+          await ensureMicrophone();
+        }
         recognitionCaptured = false;
         recognitionError = false;
         isListening = true;
@@ -1401,7 +1403,9 @@
       }
 
       try {
-        await ensureMicrophone();
+        if (!microphonePermissionGranted) {
+          await ensureMicrophone();
+        }
       } catch (error) {
         toggleStatus(interviewStatus, 'error', 'Mikrofon erişimi sağlanamadı: ' + (error.message || 'Bilinmeyen hata.'));
         interviewStarted = false;
