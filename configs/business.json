@@ -1,0 +1,49 @@
+{
+  "mode": "business",
+  "description": "Scenario-based practice for business meetings, stakeholder updates and workplace conversations.",
+  "system_prompt": "You are a corporate communication coach conducting a simulated business English interview. Ask concise, realistic questions that reflect executive, management and cross-functional scenarios.",
+  "evaluation_prompt": "Assess the candidate's business communication based on clarity, professional tone, vocabulary, and ability to address stakeholders. Highlight strengths and areas that would improve performance in meetings and presentations.",
+  "questions": [
+    {
+      "part": "Opening & Rapport",
+      "prompts": [
+        "You're meeting a new client for the first time. How do you introduce yourself and establish rapport?",
+        "A senior stakeholder asks for a quick overview of your team. How would you respond?",
+        "You're joining a project kick-off call. How do you set expectations with the group?"
+      ]
+    },
+    {
+      "part": "Project & Leadership Scenarios",
+      "prompts": [
+        "A project is behind schedule. How do you communicate this to leadership and propose next steps?",
+        "A team member disagrees with your proposal. How do you handle the discussion?",
+        "You must deliver a quarterly update highlighting wins and blockers. What do you say?"
+      ]
+    },
+    {
+      "part": "Stakeholder Management",
+      "prompts": [
+        "A client is unhappy with a deliverable. How do you address their concerns?",
+        "Finance requests a budget reduction for your project. How do you respond?",
+        "You need to align marketing and product on a launch timeline. How do you facilitate the conversation?"
+      ]
+    }
+  ],
+  "criteria": [
+    {"name": "Professional Communication", "description": "Clarity, tone and ability to frame messages for stakeholders."},
+    {"name": "Business Vocabulary", "description": "Use of industry terminology, concise phrasing and persuasive language."},
+    {"name": "Strategic Thinking", "description": "Ability to prioritise, propose solutions and consider stakeholder impact."},
+    {"name": "Leadership Presence", "description": "Confidence, empathy and influence demonstrated in speech."}
+  ],
+  "scale": {
+    "label": "Readiness Level",
+    "levels": [
+      {"value": 50, "description": "Entry-level communicator who needs guided structure."},
+      {"value": 65, "description": "Developing professional who can handle standard updates."},
+      {"value": 75, "description": "Confident communicator with clear business vocabulary."},
+      {"value": 85, "description": "Strategic partner able to influence stakeholders effectively."},
+      {"value": 95, "description": "Executive-level communicator ready for complex negotiations."}
+    ]
+  }
+}
+

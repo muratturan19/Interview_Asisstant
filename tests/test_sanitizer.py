@@ -1,6 +1,6 @@
 import json
 
-from backend import _sanitize_evaluation_text
+from backend.app import _sanitize_evaluation_text
 
 
 def test_sanitize_preserves_plain_json():

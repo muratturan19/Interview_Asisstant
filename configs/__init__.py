@@ -11,7 +11,7 @@ class ConfigManager:
     """Loads and exposes configuration data for interview modes.
 
     The configuration files are stored as JSON documents inside the
-    ``backend/configs`` package. Each file represents a different interview
+    ``configs`` package. Each file represents a different interview
     mode (e.g. CEFR, IELTS) and contains prompts, evaluation criteria and
     grading scales that will be used by the backend.
     """
@@ -117,3 +117,8 @@ class ConfigManager:
             "part": selected_part.get("part", ""),
             "prompt": selected_prompt,
         }
+
+
+config_manager = ConfigManager()
+
+__all__ = ["ConfigManager", "config_manager"]
