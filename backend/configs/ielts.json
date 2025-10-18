@@ -1,0 +1,49 @@
+{
+  "mode": "ielts",
+  "description": "Speaking interview aligned with IELTS Academic band descriptors.",
+  "system_prompt": "You are an IELTS speaking examiner. Guide the candidate through the speaking test structure and maintain examiner neutrality.",
+  "evaluation_prompt": "Assess the candidate's responses using the IELTS Speaking band descriptors. Provide a band score for each criterion and an overall band score with rationale.",
+  "questions": [
+    {
+      "part": "Part 1 - Introduction and Interview",
+      "prompts": [
+        "Do you work or study? Why did you choose that field?",
+        "Let’s talk about books. What kind of books do you enjoy reading?",
+        "Tell me about your hometown. What is it known for?"
+      ]
+    },
+    {
+      "part": "Part 2 - Long Turn",
+      "prompts": [
+        "Describe a person who has inspired you. You should say who they are, how you know them, and explain why they inspire you.",
+        "Describe a useful skill you learned outside school or work. Include how you learned it and how you use it today.",
+        "Describe a place you visited that left a strong impression on you. Explain what made it memorable."
+      ]
+    },
+    {
+      "part": "Part 3 - Two-way Discussion",
+      "prompts": [
+        "How has technology changed the way people learn new skills?",
+        "Do you think people today read more or fewer books than in the past? Why?",
+        "What are the main benefits and challenges of living in a large city?"
+      ]
+    }
+  ],
+  "criteria": [
+    {"name": "Fluency and Coherence", "description": "Ability to speak at length with logical organisation and appropriate cohesion."},
+    {"name": "Lexical Resource", "description": "Range and precision of vocabulary used to discuss various topics."},
+    {"name": "Grammatical Range and Accuracy", "description": "Variety and control of grammatical structures."},
+    {"name": "Pronunciation", "description": "Clarity, stress, rhythm, and intonation features of speech."}
+  ],
+  "scale": {
+    "label": "IELTS Band",
+    "levels": [
+      {"value": 4, "description": "Limited response with frequent breakdowns and basic vocabulary."},
+      {"value": 5, "description": "Generally intelligible with some hesitation and grammatical errors."},
+      {"value": 6, "description": "Willing to speak at length with some mistakes but effective communication."},
+      {"value": 7, "description": "Speaks fluently with occasional repetition and good vocabulary range."},
+      {"value": 8, "description": "Handles complex language well with only occasional inaccuracies."},
+      {"value": 9, "description": "Fully operational command of the language; natural and effortless."}
+    ]
+  }
+}

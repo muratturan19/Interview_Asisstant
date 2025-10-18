@@ -1,0 +1,65 @@
+{
+  "mode": "cefr",
+  "description": "Interview questions and evaluation guidance aligned with CEFR proficiency levels.",
+  "system_prompt": "You are an English examiner conducting a CEFR-aligned speaking interview. Ask one question at a time and adapt follow-ups based on the candidate's responses.",
+  "evaluation_prompt": "You are a certified CEFR examiner. Review the following transcript and summarise the candidate's performance. Provide an overall CEFR level and justify it with evidence from the transcript.",
+  "questions": [
+    {
+      "part": "Part 1 - Personal Introduction",
+      "prompts": [
+        "Can you describe a hobby you enjoy and explain why it interests you?",
+        "Tell me about your daily routine. What parts do you find most enjoyable?",
+        "What is something new you learned recently and how did you learn it?"
+      ]
+    },
+    {
+      "part": "Part 2 - Long Turn",
+      "prompts": [
+        "Describe a memorable journey you have taken. Please include where you went, who you were with, and what made it special.",
+        "Talk about a challenge you faced in the past year. Explain how you dealt with it and what you learned from the experience.",
+        "Describe a piece of technology you find useful. Explain how it helps you in your daily life."
+      ]
+    },
+    {
+      "part": "Part 3 - Discussion",
+      "prompts": [
+        "How do you think technology influences the way people communicate today?",
+        "What are the advantages and disadvantages of working remotely?",
+        "In your opinion, how can communities encourage people to live healthier lives?"
+      ]
+    }
+  ],
+  "criteria": [
+    {
+      "name": "Range",
+      "description": "Variety and appropriateness of vocabulary and grammatical structures used by the candidate."
+    },
+    {
+      "name": "Accuracy",
+      "description": "The degree of grammatical control and error-free production during the interview."
+    },
+    {
+      "name": "Fluency",
+      "description": "Smoothness of delivery, including pace, hesitation management, and coherence of ideas."
+    },
+    {
+      "name": "Interaction",
+      "description": "Ability to respond to questions, develop topics, and engage in discussion with the examiner."
+    },
+    {
+      "name": "Pronunciation",
+      "description": "Clarity of speech, stress, intonation, and overall intelligibility."
+    }
+  ],
+  "scale": {
+    "label": "CEFR Level",
+    "levels": [
+      {"value": "A1", "description": "Can communicate in simple terms with support and slow speech."},
+      {"value": "A2", "description": "Can handle short social exchanges and describe basic needs."},
+      {"value": "B1", "description": "Can deal with most situations while travelling and describe experiences."},
+      {"value": "B2", "description": "Can interact with a degree of fluency and spontaneity on a range of topics."},
+      {"value": "C1", "description": "Can express ideas fluently and spontaneously with flexible language use."},
+      {"value": "C2", "description": "Can present complex information with precision and ease across contexts."}
+    ]
+  }
+}
