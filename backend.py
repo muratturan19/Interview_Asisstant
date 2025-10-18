@@ -4,6 +4,8 @@ from flask_cors import CORS
 import anthropic
 import os
 import json
+import logging
+import re
 from pathlib import Path
 
 VALID_MODES = {"toefl", "ielts", "business", "casual"}
@@ -348,8 +350,35 @@ def _test_api_key(api_key: str) -> None:
         messages=[{"role": "user", "content": "Hi"}],
     )
 
+
+FENCE_LABEL_PATTERN = r"[a-z0-9_+\-]*"
+
+
+def _sanitize_evaluation_text(text: str) -> str:
+    """Normalize Claude's response so it can be parsed as JSON."""
+    if not isinstance(text, str):
+        return text
+
+    sanitized = text.strip()
+
+    if not sanitized:
+        return sanitized
+
+    for fence in ("```", "~~~"):
+        prefix_re = re.compile(
+            rf"^{re.escape(fence)}{FENCE_LABEL_PATTERN}\s*",
+            re.IGNORECASE,
+        )
+        sanitized = prefix_re.sub("", sanitized, count=1)
+
+        suffix_re = re.compile(rf"\s*{re.escape(fence)}$", re.IGNORECASE)
+        sanitized = suffix_re.sub("", sanitized, count=1)
+
+    return sanitized.strip()
+
 app = Flask(__name__)
 CORS(app)  # CORS sorununu çözer
+logger = logging.getLogger(__name__)
 
 @app.route('/api/validate-key', methods=['POST'])
 def validate_key():
@@ -434,7 +463,26 @@ def evaluate():
         if not evaluation_text:
             return jsonify({'error': "Claude'dan geçerli yanıt alınamadı"}), 500
 
-        evaluation = json.loads(evaluation_text)
+        sanitized_text = _sanitize_evaluation_text(evaluation_text)
+
+        try:
+            evaluation = json.loads(sanitized_text)
+        except json.JSONDecodeError:
+            logger.error(
+                "Failed to decode evaluation payload. Raw response: %s",
+                sanitized_text,
+                exc_info=True,
+            )
+            return (
+                jsonify(
+                    {
+                        'error': "Claude'dan geçersiz yanıt",
+                        'details': 'Claude yanıtı JSON formatında değil.',
+                    }
+                ),
+                500,
+            )
+
         evaluation.setdefault('mode', evaluation_mode)
         evaluation.setdefault('overall_scale', MODE_CONFIG[evaluation_mode]['overall_scale'])
 
@@ -445,6 +493,7 @@ def evaluate():
     except anthropic.AuthenticationError:
         return jsonify({'error': 'Geçersiz API Key'}), 401
     except json.JSONDecodeError:
+        logger.exception('Failed to decode evaluation payload outside main handler')
         return jsonify({'error': 'Claude\'dan geçersiz yanıt'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
