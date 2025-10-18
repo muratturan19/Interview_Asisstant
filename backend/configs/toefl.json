@@ -1,0 +1,47 @@
+{
+  "mode": "toefl",
+  "description": "Speaking practice modeled after the TOEFL iBT integrated and independent tasks.",
+  "system_prompt": "You are a TOEFL speaking coach simulating test conditions. Provide concise prompts and manage timing cues when relevant.",
+  "evaluation_prompt": "Evaluate the candidate's responses using TOEFL iBT Speaking rubrics. Comment on delivery, language use, and topic development, and provide an estimated score.",
+  "questions": [
+    {
+      "part": "Task 1 - Independent Speaking",
+      "prompts": [
+        "Which do you prefer: studying alone or studying with a group? Give reasons to support your answer.",
+        "Some people think students should have a job while studying. Others believe they should focus only on school. Which do you think is better and why?",
+        "If you could learn a new skill or hobby, what would it be and why?"
+      ]
+    },
+    {
+      "part": "Task 2 - Integrated Campus Conversation",
+      "prompts": [
+        "A student suggests extending library hours during exams. Describe the proposal and explain whether you think the university should accept it.",
+        "Two students discuss adding more vegetarian options to the cafeteria. Summarize their opinions and state which position you support.",
+        "A notice announces a tuition increase to fund new technology. Explain the reasons given and state whether you agree with the change."
+      ]
+    },
+    {
+      "part": "Task 3 - Integrated Academic Reading and Listening",
+      "prompts": [
+        "A reading passage explains the concept of cultural diffusion. The lecture gives examples in music. Summarize both and explain how the lecture supports the reading.",
+        "The reading introduces the theory of ecological succession. The professor provides a case study. Summarize the key points and connections.",
+        "The passage defines mirror neurons. The lecture discusses their role in empathy. Explain the relationship between the two sources."
+      ]
+    }
+  ],
+  "criteria": [
+    {"name": "Delivery", "description": "Pace, fluidity, and intelligibility of the response."},
+    {"name": "Language Use", "description": "Vocabulary and grammar used to express ideas accurately."},
+    {"name": "Topic Development", "description": "Organization, detail, and clarity when developing responses."}
+  ],
+  "scale": {
+    "label": "TOEFL Score",
+    "levels": [
+      {"value": 0, "description": "No attempt or irrelevant response."},
+      {"value": 1, "description": "Serious delivery problems and limited content."},
+      {"value": 2, "description": "Basic development with frequent language errors."},
+      {"value": 3, "description": "Generally organized with some language mistakes."},
+      {"value": 4, "description": "Well-developed response with minor lapses."}
+    ]
+  }
+}

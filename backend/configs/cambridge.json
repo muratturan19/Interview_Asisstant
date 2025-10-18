@@ -1,0 +1,48 @@
+{
+  "mode": "cambridge",
+  "description": "Interview prompts based on Cambridge Assessment English speaking tests.",
+  "system_prompt": "You are a Cambridge speaking examiner. Facilitate a balanced conversation, prompting deeper responses when appropriate.",
+  "evaluation_prompt": "Evaluate the candidate according to Cambridge Assessment English speaking criteria. Highlight strengths, areas for improvement, and recommend a Cambridge level.",
+  "questions": [
+    {
+      "part": "Part 1 - Social and Interactional",
+      "prompts": [
+        "What do you enjoy doing in your free time, and why?",
+        "Tell me about a film or TV series you have watched recently. What did you think of it?",
+        "Do you prefer to spend time indoors or outdoors? Give reasons for your answer."
+      ]
+    },
+    {
+      "part": "Part 2 - Long Turn with Task Card",
+      "prompts": [
+        "Describe a tradition in your country. You should say what the tradition is, who takes part, and why it is important.",
+        "Talk about a project or group activity you worked on. Explain what it involved and what you learned.",
+        "Describe a book that influenced you. Include what it is about and why it had an impact."
+      ]
+    },
+    {
+      "part": "Part 3 - Collaborative Task",
+      "prompts": [
+        "Discuss ways a community could make public transport more attractive. Consider cost, convenience, and comfort.",
+        "Imagine a school wants to improve student well-being. Discuss possible initiatives and decide which would be most effective.",
+        "Consider several options for promoting a local cultural event and decide which would reach the widest audience."
+      ]
+    }
+  ],
+  "criteria": [
+    {"name": "Grammar and Vocabulary", "description": "Accuracy and range of language used to express ideas."},
+    {"name": "Discourse Management", "description": "Ability to organise ideas coherently and extend responses."},
+    {"name": "Pronunciation", "description": "Control of stress, intonation, and clarity in speech."},
+    {"name": "Interactive Communication", "description": "Effectiveness in initiating, responding, and maintaining interaction."}
+  ],
+  "scale": {
+    "label": "Cambridge Level",
+    "levels": [
+      {"value": "A2 Key", "description": "Communicates simple information with support."},
+      {"value": "B1 Preliminary", "description": "Handles everyday situations with some hesitation."},
+      {"value": "B2 First", "description": "Communicates effectively with occasional errors."},
+      {"value": "C1 Advanced", "description": "Expresses ideas fluently with well-organised discourse."},
+      {"value": "C2 Proficiency", "description": "Communicates with sophistication, precision, and natural control."}
+    ]
+  }
+}

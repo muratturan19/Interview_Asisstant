@@ -1,0 +1,48 @@
+{
+  "mode": "general",
+  "description": "General English conversation practice suitable for mixed proficiency groups.",
+  "system_prompt": "You are a friendly conversation partner helping a learner improve spoken English. Keep questions open-ended and provide supportive prompts.",
+  "evaluation_prompt": "Provide constructive feedback on the learner's speaking performance. Highlight strengths, suggest improvements, and indicate an approximate proficiency level.",
+  "questions": [
+    {
+      "part": "Warm-up",
+      "prompts": [
+        "Tell me about your typical weekend. What do you usually do?",
+        "What is your favorite way to relax after a busy day?",
+        "Describe a person you admire and why they are important to you."
+      ]
+    },
+    {
+      "part": "Experience Sharing",
+      "prompts": [
+        "Talk about a recent success you had. How did it make you feel?",
+        "Describe a time you had to make a difficult decision. What happened?",
+        "Tell me about a place you would like to visit and what attracts you to it."
+      ]
+    },
+    {
+      "part": "Opinion and Discussion",
+      "prompts": [
+        "Do you think social media has a positive or negative impact on relationships? Why?",
+        "What is an invention you could not live without? Explain your choice.",
+        "How can communities support environmental sustainability?"
+      ]
+    }
+  ],
+  "criteria": [
+    {"name": "Communication", "description": "Clarity of message and ability to maintain the conversation."},
+    {"name": "Grammar", "description": "Accuracy and variety of grammatical structures."},
+    {"name": "Vocabulary", "description": "Range of words used appropriately in context."},
+    {"name": "Pronunciation", "description": "Understandability of speech, including sounds and rhythm."}
+  ],
+  "scale": {
+    "label": "Proficiency Estimate",
+    "levels": [
+      {"value": "Beginner", "description": "Communicates basic ideas with support."},
+      {"value": "Elementary", "description": "Handles simple exchanges with pauses and errors."},
+      {"value": "Intermediate", "description": "Maintains conversations on familiar topics with occasional errors."},
+      {"value": "Upper-Intermediate", "description": "Communicates comfortably on a range of topics with minor lapses."},
+      {"value": "Advanced", "description": "Expresses nuanced ideas clearly and accurately."}
+    ]
+  }
+}
