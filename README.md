@@ -1,238 +1,105 @@
 # Interview Assistant
 
-Interview Assistant is a lightweight tool that validates an Anthropic API key, sends interview transcripts to Claude for evaluation, and presents the results in a rich web UI.
+Interview Assistant is a config-driven practice tool for spoken-English interviews. The backend loads mode definitions from JSON files, uses Anthropic's Claude Sonnet 4.5 model for both live interview questions and structured scoring, and exposes a lightweight REST API consumed by a React + Vite front-end.
 
-## Prerequisites
+## Quick start
+
+### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- An Anthropic API key
+- An Anthropic API key with access to Claude Sonnet 4.5
 
-## Installation
-1. (Optional) Create and activate a virtual environment for the backend.
-2. Install the backend dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Install the front-end dependencies:
-   ```bash
-   npm install
-   ```
+### 1. Install backend dependencies
+```bash
+pip install -r requirements.txt
+```
 
-## Configuring the Anthropic API key
-You can provide the API key in two different ways:
+### 2. Install front-end dependencies
+```bash
+npm install
+```
 
-- **Using a `.env` file**: create a file named `.env` in the project root and add the key as shown below:
-  ```env
-  ANTHROPIC_API_KEY=sk-ant-...
-  ```
-- **Using the web UI**: start the backend server (see below) and open `interview.html` in your browser. If no key is found in `.env`, the page will prompt you to enter the key. Click **Save API Key** to validate and persist it automatically.
-
-Once the key is stored in `.env`, the input form is hidden on future visits. The same file now also remembers your last scoring preference under `LAST_EVALUATION_MODE` so that the UI can default to the framework you used previously.
-
-## Running the backend
-Start the Flask server:
+### 3. Run the services
+Start the Flask API (runs on `http://localhost:5000`):
 ```bash
 python backend.py
 ```
-The server listens on `http://localhost:5000` and exposes endpoints for validating API keys and evaluating interviews.
 
-## Running the front-end
-The React front-end is built with [Vite](https://vitejs.dev/). Start the development server after the backend is running:
-
+In a second terminal start the Vite dev server (serves on `http://localhost:5173`):
 ```bash
 npm run dev
 ```
 
-Then open [http://localhost:5173/interview.html](http://localhost:5173/interview.html) in your browser. The UI allows you to:
+Open [`http://localhost:5173/interview.html`](http://localhost:5173/interview.html) to use the UI.
 
-1. Fetch the available evaluation modes from `/api/modes` and select one from the dropdown.
-2. Request the first interview question for the chosen mode via `/api/get-first-question`.
-3. Chat with the assistant through `/api/chat`, which now tracks the selected mode on every request.
-4. Transfer the conversation transcript and send it for scoring using `/api/evaluate`, again including the active mode.
+## Configuring credentials and preferences
 
-To create a production build run:
+The backend looks for an Anthropic API key in the environment or in a project-level `.env` file. You can create it manually:
+```env
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
+or supply the key through the UI: the **API key** field on the main page will POST to `/api/save-key`, validate the key with a short Claude request, and persist it to `.env`. The backend also remembers the last selected evaluation mode under the `LAST_EVALUATION_MODE` entry so the UI can default to your previous choice.
+
+To update or remove the key, edit or delete the corresponding entry in `.env` and refresh the page.
+
+## How the new system works
+
+1. **Mode discovery.** `/api/modes` reads the JSON definitions in `configs/*.json` and returns descriptions, criteria, and scoring scale metadata for the supported modes. The UI uses this to render the mode selector and rubric cards.
+2. **Question flow.** Clicking **İlk soruyu al** requests `/api/get-first-question`. The backend picks a random prompt for the chosen mode, resets the conversation state, and tracks it by the browser-provided session ID.
+3. **Guided conversation.** `/api/chat` keeps up to five question–answer pairs (`MAX_QA_PAIRS`) per session and mode. Each response is generated with the mode-specific system prompt and the active Anthropic key.
+4. **Structured evaluation.** `/api/evaluate` composes a long-form user prompt that embeds the transcript, mode guidance, examples, and JSON schema. Claude's JSON response is sanitised and validated before being returned to the UI for display.
+
+The UI automatically converts the chat history into an evaluation transcript, but you can override it manually before submitting for scoring.
+
+## Available evaluation modes
+
+All modes share the same JSON contract (overall score, criterion scores, question breakdown, strengths, improvements, and specific examples). Each mode simply adjusts the rubric weights, expected scale, and feedback guidance:
+
+| Mode | Scale | Key criteria | Highlights |
+| ---- | ----- | ------------ | ---------- |
+| 🎓 **TOEFL Speaking (Academic)** | 0–30 total (0–4 per question) | Delivery, Language Use, Topic Development | Includes CEFR level and IELTS/Business/Casual score conversions.
+| 🇬🇧 **IELTS Speaking (British)** | Band 0–9 (0.5 increments) | Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation | Reports band per criterion plus TOEFL/Business/Casual equivalents.
+| 💼 **Business English (Professional)** | 0–100 weighted | Professional Communication, Business Vocabulary, Clarity & Structure, Meeting Skills, Confidence | Adds professional level labels and recommended roles.
+| 💬 **Casual Conversation (Daily English)** | 0–100 weighted | Natural Flow, Idiom Usage, Cultural Awareness, Informal Language, Authenticity | Surfaces idiom examples and a native-likeness percentage.
+
+Each mode includes reference examples inside the backend prompt to keep Claude calibrated to the target rubric.
+
+## API reference (for automation or integrations)
+
+| Method & path | Purpose | Expected payload | Notes |
+| ------------- | ------- | ---------------- | ----- |
+| `GET /api/health` | Health probe | — | Returns `{ "status": "ok" }` when the backend is running. |
+| `GET /api/modes` | List supported modes | — | Used by the UI to render descriptions, criteria, and scale details. |
+| `POST /api/get-first-question` | Start/reset an interview session | `{ "session_id": string, "mode": string }` | Returns the first prompt plus the remaining question quota. |
+| `POST /api/chat` | Continue the guided conversation | `{ "session_id": string, "mode": string, "message": string, "api_key"?: string }` | Maintains history for up to five user turns and echoes the running transcript. |
+| `POST /api/evaluate` | Score an interview transcript | `{ "transcript": string, "evaluation_mode": string, "api_key"?: string }` | Responds with validated JSON containing scores, feedback, and examples. |
+| `POST /api/validate-key` | Validate an Anthropic key without saving it | `{ "api_key": string }` | Useful for front-end form validation. |
+| `POST /api/save-key` | Persist a verified Anthropic key | `{ "api_key": string }` | Writes the key to `.env` and to the process environment. |
+| `GET /api/api-key-status` | Check stored key status | — | Returns `has_key`, `last_mode`, and the list of available modes. |
+
+## Building for production
+
+Create an optimised UI bundle with:
 ```bash
 npm run build
 ```
+The assets will be emitted to `dist/` along with a processed `interview.html` wrapper that points at the built scripts.
 
-The compiled assets are emitted to `dist/` together with a processed `interview.html` wrapper.
+## Tests
 
-## Updating or removing the API key
-To change the stored key, edit or delete the `ANTHROPIC_API_KEY` entry inside the `.env` file and refresh the page. The UI will prompt for a new key when needed.
+Backend utilities that sanitise and validate Claude responses are covered by unit tests. Run them with:
+```bash
+pytest
+```
 
-## Evaluation modes
+## Manual QA checklist
 
-The assistant now supports four professional scoring frameworks. Each mode uses a dedicated system prompt, dedicated rubrics, and tailored reporting on the results screen.
+After starting the backend (`python backend.py`) and opening the UI, you can sanity-check each mode:
 
-### 🎓 TOEFL Speaking (Academic)
-- **Skala:** 0–4 (soru bazında) → 0–30 toplam.
-- **Kriterler:** Delivery, Language Use, Topic Development.
-- **Çıktılar:** Her görev için 0–4 puan, CEFR eşleştirmesi, IELTS/Biz/Casual karşılıkları.
-- **Örnek çıktı:**
-  ```json
-  {
-    "mode": "toefl",
-    "overall_score": 27,
-    "overall_scale": "0-30",
-    "criterion_scores": {
-      "delivery": {"score": 3, "max_score": 4, "weight": 0.15},
-      "language_use": {"score": 3.5, "max_score": 4, "weight": 0.4},
-      "topic_development": {"score": 3.5, "max_score": 4, "weight": 0.45}
-    },
-    "cefr_level": "C1",
-    "equivalent_scores": {
-      "ielts_band": 7.5,
-      "business_score": 82,
-      "casual_score": 85
-    },
-    "question_breakdown": [
-      {
-        "question_number": 1,
-        "score": 3,
-        "max_score": 4,
-        "feedback": "Speech was clear with minor pauses; add one more detail about the neighbourhood."
-      }
-    ],
-    "strengths": ["Net ve akıcı anlatım", "Akademik kelime seçimi"],
-    "improvements": ["Daha fazla örnek", "Bağlaç çeşitliliği"],
-    "detailed_feedback": "The response demonstrates solid academic English with occasional hesitation. Provide richer examples to secure a 4.",
-    "specific_examples": {
-      "good": ["'bridges Europe and Asia' ifadesi", "Tarihsel referanslar"],
-      "needs_work": ["Kapanış cümlesi kısa kaldı"]
-    }
-  }
-  ```
+1. **TOEFL akademik kontrolü** – Select the TOEFL card, paste an academic-style transcript, click **Evaluate Interview**, and confirm the 0–30 totals plus per-question 0–4 scores and CEFR/IELTS equivalents.
+2. **IELTS British değerlendirmesi** – Switch to IELTS and verify that each criterion reports a band score in 0.5 increments alongside the TOEFL conversion.
+3. **Business English profesyonel seviyesi** – Use a business-focused transcript and confirm the professional level label and recommended roles.
+4. **Casual Conversation günlük konuşması** – Provide a casual transcript and check the native-likeness percentage and idiom/slang examples.
+5. **Mod kalıcılığı** – After running an evaluation, refresh the page and ensure that the last-used mode remains selected via the `LAST_EVALUATION_MODE` entry in `.env`.
 
-### 🇬🇧 IELTS Speaking (British)
-- **Skala:** Band 0–9 (0.5 artışlarla).
-- **Kriterler:** Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation.
-- **Çıktılar:** Her kriter için band değeri, CEFR, TOEFL/Business/Casual tahminleri.
-- **Örnek çıktı:**
-  ```json
-  {
-    "mode": "ielts",
-    "overall_score": 7.5,
-    "overall_scale": "Band 0-9",
-    "criterion_scores": {
-      "fluency_coherence": {"score": 7.5, "max_score": 9},
-      "lexical_resource": {"score": 7, "max_score": 9},
-      "grammatical_range_accuracy": {"score": 7, "max_score": 9},
-      "pronunciation": {"score": 8, "max_score": 9}
-    },
-    "cefr_level": "C1",
-    "equivalent_scores": {
-      "toefl_total": 25,
-      "business_score": 80,
-      "casual_score": 83
-    },
-    "question_breakdown": [
-      {
-        "question_number": 1,
-        "score": 7.5,
-        "max_score": 9,
-        "feedback": "Uses linking phrases naturally; add one complex sentence to reach band 8."
-      }
-    ],
-    "strengths": ["Akıcı ve bağlantılı anlatım", "Doğru telaffuz"],
-    "improvements": ["Daha fazla ileri yapı", "Kelime çeşitliliği"],
-    "detailed_feedback": "Overall performance aligns with a strong band 7.5. Continue adding idiomatic language for band 8.",
-    "specific_examples": {
-      "good": ["'on balance' ifadesi"],
-      "needs_work": ["Karmaşık cümle yapısı eksik"]
-    }
-  }
-  ```
-
-### 💼 Business English (Professional)
-- **Skala:** 0–100, % ağırlıklı kriterler.
-- **Kriterler:** Professional Communication, Business Vocabulary, Clarity & Structure, Meeting Skills, Confidence.
-- **Çıktılar:** Profesyonel seviye etiketi, önerilen pozisyonlar, diğer modlara dönüşümler.
-- **Örnek çıktı:**
-  ```json
-  {
-    "mode": "business",
-    "overall_score": 84,
-    "overall_scale": "0-100",
-    "criterion_scores": {
-      "professional_communication": {"score": 86, "weight": 0.25},
-      "business_vocabulary": {"score": 82, "weight": 0.25},
-      "clarity_structure": {"score": 80, "weight": 0.2},
-      "meeting_skills": {"score": 85, "weight": 0.15},
-      "confidence": {"score": 88, "weight": 0.15}
-    },
-    "professional_level": "Senior professional",
-    "recommended_roles": ["Product Manager", "Client Success Lead"],
-    "equivalent_scores": {
-      "toefl_total": 24,
-      "ielts_band": 7,
-      "casual_score": 88
-    },
-    "strengths": ["Net toplantı çerçevesi", "Kurumsal ton"],
-    "improvements": ["Raporlamada daha fazla metrik", "Kapanış çağrısı"],
-    "detailed_feedback": "Presentation-ready delivery with clear stakeholder language. Introduce metrics earlier for executive impact.",
-    "specific_examples": {
-      "good": ["'stakeholder alignment' ifadesi"],
-      "needs_work": ["Sonuç bölümünde aksiyon listesi eksik"]
-    }
-  }
-  ```
-
-### 💬 Casual Conversation (Daily English)
-- **Skala:** 0–100; doğal akış ve kültürel referanslara odaklı.
-- **Kriterler:** Natural Flow, Idiom Usage, Cultural Awareness, Informal Language, Authenticity.
-- **Çıktılar:** Native-likeness yüzdesi, kullanılan idiom/slang örnekleri, diğer modlara dönüşümler.
-- **Örnek çıktı:**
-  ```json
-  {
-    "mode": "casual",
-    "overall_score": 78,
-    "overall_scale": "0-100",
-    "criterion_scores": {
-      "natural_flow": {"score": 80, "weight": 0.3},
-      "idiom_usage": {"score": 74, "weight": 0.2},
-      "cultural_awareness": {"score": 76, "weight": 0.15},
-      "informal_language": {"score": 79, "weight": 0.2},
-      "authenticity": {"score": 81, "weight": 0.15}
-    },
-    "native_likeness": 78,
-    "idiom_examples": ["kind of", "hang out", "beat me to it"],
-    "equivalent_scores": {
-      "toefl_total": 23,
-      "ielts_band": 6.5,
-      "business_score": 70
-    },
-    "strengths": ["Doğal reaksiyonlar", "Günlük deyimler"],
-    "improvements": ["Bazı cümleler fazla uzun", "Daha fazla kültürel referans"],
-    "detailed_feedback": "Casual tone feels authentic with well-placed idioms. Watch for run-on sentences when excited.",
-    "specific_examples": {
-      "good": ["'we just binge-watched' ifadesi"],
-      "needs_work": ["Uzun cümlede nefes almadan konuşma"]
-    }
-  }
-  ```
-
-## Manual test scenarios
-
-Use the following quick checks after starting the Flask backend (`python backend.py`) and opening `interview.html`:
-
-1. **TOEFL akademik kontrolü**
-   - TOEFL kartını seçin, kısa bir akademik konuşma transcripti yapıştırın (ör. şehir tanıtımı).
-   - **Evaluate Interview** düğmesine basın.
-   - Sonuç ekranında toplam 0–30 puan, her görev için 0–4 değerleri ve CEFR/IELTS karşılığını doğrulayın.
-
-2. **IELTS British değerlendirmesi**
-   - IELTS kartını seçin ve aynı transcripti kullanın.
-   - Çıktıda dört kriterin ayrı band değerlerini (0.5 artış) ve TOEFL karşılığını kontrol edin.
-
-3. **Business English profesyonel seviyesi**
-   - Business kartını seçin, toplantı/iş sunumu odaklı transcript yapıştırın.
-   - Profesyonel seviye (Entry/Junior/Mid/Senior/Executive) etiketinin ve önerilen pozisyonların geldiğini doğrulayın.
-
-4. **Casual Conversation günlük konuşması**
-   - Casual kartını seçin, arkadaş sohbeti tarzında transcript kullanın.
-   - Native-likeness yüzdesi ve idiom/slang örneklerinin listelendiğini kontrol edin.
-
-5. **Mod kalıcılığı**
-   - Bir modu seçip değerlendirme yaptıktan sonra sayfayı yenileyin.
-   - `interview.html` tekrar açıldığında aynı modun varsayılan seçili olduğunu doğrulayın (`LAST_EVALUATION_MODE` `.env` dosyasına yazılır).
