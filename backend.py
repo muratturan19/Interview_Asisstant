@@ -3,6 +3,68 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import anthropic
 import os
+import json
+from pathlib import Path
+
+
+ENV_KEY_NAME = "ANTHROPIC_API_KEY"
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+
+
+def _load_env_file() -> dict:
+    """Load key-value pairs from the .env file if it exists."""
+    if not ENV_PATH.exists():
+        return {}
+
+    data = {}
+    with ENV_PATH.open("r", encoding="utf-8") as env_file:
+        for raw_line in env_file:
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            data[key.strip()] = value.strip()
+    return data
+
+
+def _get_stored_api_key() -> str | None:
+    """Return the Anthropic API key from the environment or .env file."""
+    env_key = os.environ.get(ENV_KEY_NAME)
+    if env_key:
+        return env_key
+
+    data = _load_env_file()
+    api_key = data.get(ENV_KEY_NAME)
+    if api_key:
+        os.environ[ENV_KEY_NAME] = api_key
+    return api_key
+
+
+def _write_env_file(values: dict) -> None:
+    """Persist key-value pairs to the .env file."""
+    with ENV_PATH.open("w", encoding="utf-8") as env_file:
+        for key, value in values.items():
+            env_file.write(f"{key}={value}\n")
+
+
+def _save_api_key(api_key: str) -> None:
+    """Persist the API key in memory and the .env file."""
+    data = _load_env_file()
+    data[ENV_KEY_NAME] = api_key
+    _write_env_file(data)
+    os.environ[ENV_KEY_NAME] = api_key
+
+
+def _test_api_key(api_key: str) -> None:
+    """Perform a lightweight request to validate the Anthropic API key."""
+    client = anthropic.Anthropic(api_key=api_key)
+    client.messages.create(
+        model="claude-sonnet-4-5-20250929",
+        max_tokens=10,
+        messages=[{"role": "user", "content": "Hi"}],
+    )
 
 app = Flask(__name__)
 CORS(app)  # CORS sorununu çözer
@@ -11,41 +73,59 @@ CORS(app)  # CORS sorununu çözer
 def validate_key():
     """API Key'in geçerliliğini test eder"""
     try:
-        data = request.json
+        data = request.json or {}
         api_key = data.get('api_key')
-        
+
         if not api_key:
             return jsonify({'error': 'API key gerekli'}), 400
-        
-        # Anthropic client oluştur
-        client = anthropic.Anthropic(api_key=api_key)
-        
-        # Basit bir test çağrısı
-        message = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
-            max_tokens=10,
-            messages=[{"role": "user", "content": "Hi"}]
-        )
-        
+
+        _test_api_key(api_key)
         return jsonify({'valid': True, 'message': 'API Key geçerli!'}), 200
-        
+
     except anthropic.AuthenticationError:
         return jsonify({'valid': False, 'error': 'Geçersiz API Key'}), 401
     except Exception as e:
         return jsonify({'valid': False, 'error': str(e)}), 500
 
 
+@app.route('/api/save-key', methods=['POST'])
+def save_key():
+    """API key'i doğrular ve .env dosyasına kaydeder."""
+    try:
+        data = request.json or {}
+        api_key = data.get('api_key')
+
+        if not api_key:
+            return jsonify({'error': 'API key gerekli'}), 400
+
+        _test_api_key(api_key)
+        _save_api_key(api_key)
+        return jsonify({'saved': True, 'message': 'API key kaydedildi.'}), 200
+
+    except anthropic.AuthenticationError:
+        return jsonify({'saved': False, 'error': 'Geçersiz API Key'}), 401
+    except Exception as e:
+        return jsonify({'saved': False, 'error': str(e)}), 500
+
+
+@app.route('/api/api-key-status', methods=['GET'])
+def api_key_status():
+    """Sunucuda API key mevcut mu kontrol eder."""
+    has_key = bool(_get_stored_api_key())
+    return jsonify({'has_key': has_key}), 200
+
+
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
     """Claude ile mülakat değerlendirmesi yapar"""
     try:
-        data = request.json
-        api_key = data.get('api_key')
+        data = request.json or {}
+        api_key = data.get('api_key') or _get_stored_api_key()
         transcript = data.get('transcript')
-        
+
         if not api_key or not transcript:
             return jsonify({'error': 'API key ve transcript gerekli'}), 400
-        
+
         # Anthropic client oluştur
         client = anthropic.Anthropic(api_key=api_key)
         
@@ -80,9 +160,8 @@ Be specific and constructive in your evaluation."""
         
         # Cevabı parse et
         evaluation_text = message.content[0].text
-        
+
         # JSON olarak döndür
-        import json
         evaluation = json.loads(evaluation_text)
         
         return jsonify(evaluation), 200
