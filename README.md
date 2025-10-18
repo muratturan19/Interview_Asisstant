@@ -4,13 +4,18 @@ Interview Assistant is a lightweight tool that validates an Anthropic API key, s
 
 ## Prerequisites
 - Python 3.10+
+- Node.js 18+
 - An Anthropic API key
 
 ## Installation
-1. (Optional) Create and activate a virtual environment.
+1. (Optional) Create and activate a virtual environment for the backend.
 2. Install the backend dependencies:
    ```bash
    pip install -r requirements.txt
+   ```
+3. Install the front-end dependencies:
+   ```bash
+   npm install
    ```
 
 ## Configuring the Anthropic API key
@@ -31,11 +36,27 @@ python backend.py
 ```
 The server listens on `http://localhost:5000` and exposes endpoints for validating API keys and evaluating interviews.
 
-## Using the front-end
-1. Open the `interview.html` file in a browser. When loaded directly via `file://`, the page automatically targets the backend at `http://localhost:5000`, so make sure the Flask server is running first.
-2. Seçmek istediğiniz değerlendirme modunu kartlardan işaretleyin (TOEFL, IELTS, Business veya Casual).
-3. If prompted, save a valid Anthropic API key.
-4. Paste an interview transcript and click **Evaluate Interview** to receive mode-specific feedback.
+## Running the front-end
+The React front-end is built with [Vite](https://vitejs.dev/). Start the development server after the backend is running:
+
+```bash
+npm run dev
+```
+
+Then open [http://localhost:5173/interview.html](http://localhost:5173/interview.html) in your browser. The UI allows you to:
+
+1. Fetch the available evaluation modes from `/api/modes` and select one from the dropdown.
+2. Request the first interview question for the chosen mode via `/api/get-first-question`.
+3. Chat with the assistant through `/api/chat`, which now tracks the selected mode on every request.
+4. Transfer the conversation transcript and send it for scoring using `/api/evaluate`, again including the active mode.
+
+To create a production build run:
+
+```bash
+npm run build
+```
+
+The compiled assets are emitted to `dist/` together with a processed `interview.html` wrapper.
 
 ## Updating or removing the API key
 To change the stored key, edit or delete the `ANTHROPIC_API_KEY` entry inside the `.env` file and refresh the page. The UI will prompt for a new key when needed.
