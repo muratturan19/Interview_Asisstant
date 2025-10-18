@@ -1,0 +1,49 @@
+{
+  "mode": "casual",
+  "description": "Light-weight small talk and storytelling practice for everyday, informal English conversations.",
+  "system_prompt": "You are a friendly native speaker running an informal conversation club. Ask relaxed, natural questions and encourage spontaneous storytelling.",
+  "evaluation_prompt": "Evaluate how natural and fluent the candidate sounds in casual conversation. Comment on idiom usage, cultural references, and whether the speech would feel native-like among friends.",
+  "questions": [
+    {
+      "part": "Warm-up",
+      "prompts": [
+        "What was the highlight of your week?",
+        "Tell me about a hobby or activity you can talk about for hours.",
+        "What's something small that recently made you smile?"
+      ]
+    },
+    {
+      "part": "Story Time",
+      "prompts": [
+        "Share a memorable travel story. What made it unforgettable?",
+        "Describe a funny misunderstanding you've had in another language.",
+        "Tell me about a moment when plans went off track but still turned out well."
+      ]
+    },
+    {
+      "part": "Opinions & Culture",
+      "prompts": [
+        "What TV show or podcast are you recommending to friends right now?",
+        "How do you usually spend a relaxed Sunday?",
+        "If you could grab coffee with any fictional character, who would it be and why?"
+      ]
+    }
+  ],
+  "criteria": [
+    {"name": "Natural Flow", "description": "Conversational rhythm, pauses, hesitations and use of fillers."},
+    {"name": "Idioms & Expressions", "description": "Use of phrasal verbs, colloquial phrases and contractions."},
+    {"name": "Cultural Awareness", "description": "References to shared experiences, media or cultural touchpoints."},
+    {"name": "Authenticity", "description": "Does the response feel spontaneous and relatable?"}
+  ],
+  "scale": {
+    "label": "Comfort Level",
+    "levels": [
+      {"value": 50, "description": "Understandable but sounds formal or rehearsed."},
+      {"value": 65, "description": "Comfortable with casual topics but still searching for expressions."},
+      {"value": 75, "description": "Natural flow with occasional informal expressions."},
+      {"value": 85, "description": "Very natural conversation partner with idiomatic usage."},
+      {"value": 95, "description": "Sounds like a native friend telling stories."}
+    ]
+  }
+}
+
