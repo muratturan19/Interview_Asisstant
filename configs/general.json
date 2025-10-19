@@ -30,19 +30,56 @@
     }
   ],
   "criteria": [
-    {"name": "Communication", "description": "Clarity of message and ability to maintain the conversation."},
-    {"name": "Grammar", "description": "Accuracy and variety of grammatical structures."},
-    {"name": "Vocabulary", "description": "Range of words used appropriately in context."},
-    {"name": "Pronunciation", "description": "Understandability of speech, including sounds and rhythm."}
+    {
+      "name": "Communication",
+      "description": "Clarity of message and ability to maintain the conversation."
+    },
+    {
+      "name": "Grammar",
+      "description": "Accuracy and variety of grammatical structures."
+    },
+    {
+      "name": "Vocabulary",
+      "description": "Range of words used appropriately in context."
+    },
+    {
+      "name": "Pronunciation",
+      "description": "Understandability of speech, including sounds and rhythm."
+    }
   ],
   "scale": {
     "label": "Proficiency Estimate",
     "levels": [
-      {"value": "Beginner", "description": "Communicates basic ideas with support."},
-      {"value": "Elementary", "description": "Handles simple exchanges with pauses and errors."},
-      {"value": "Intermediate", "description": "Maintains conversations on familiar topics with occasional errors."},
-      {"value": "Upper-Intermediate", "description": "Communicates comfortably on a range of topics with minor lapses."},
-      {"value": "Advanced", "description": "Expresses nuanced ideas clearly and accurately."}
+      {
+        "value": "Beginner",
+        "description": "Communicates basic ideas with support."
+      },
+      {
+        "value": "Elementary",
+        "description": "Handles simple exchanges with pauses and errors."
+      },
+      {
+        "value": "Intermediate",
+        "description": "Maintains conversations on familiar topics with occasional errors."
+      },
+      {
+        "value": "Upper-Intermediate",
+        "description": "Communicates comfortably on a range of topics with minor lapses."
+      },
+      {
+        "value": "Advanced",
+        "description": "Expresses nuanced ideas clearly and accurately."
+      }
     ]
+  },
+  "evaluation": {
+    "system_prompt": "You are an experienced English language coach evaluating everyday communication skills across CEFR-aligned proficiency levels.\n\nASSESSMENT OVERVIEW (1-5 scale):\n5 (Excellent): Confident, accurate and nuanced speech with natural rhythm.\n4 (Strong): Clear communication with occasional slips that do not impede meaning.\n3 (Competent): Communicates main ideas with some hesitation or language gaps.\n2 (Developing): Limited range, noticeable errors and difficulty expanding responses.\n1 (Beginning): Very short or memorised answers with frequent breakdowns.\n\nFocus on clarity, range of language and ability to elaborate when prompted.",
+    "overall_scale": "1-5 rubric",
+    "criterion_template": "{\n    \"communication\": {\"score\": <number 1-5>, \"max_score\": 5},\n    \"grammar\": {\"score\": <number 1-5>, \"max_score\": 5},\n    \"vocabulary\": {\"score\": <number 1-5>, \"max_score\": 5},\n    \"pronunciation\": {\"score\": <number 1-5>, \"max_score\": 5}\n}",
+    "equivalent_template": "{\n    \"cefr_level\": \"<A1/A2/B1/B2/C1/C2>\",\n    \"ielts_band\": <number 0-9>,\n    \"toefl_total\": <number 0-30>\n}",
+    "question_max": 5,
+    "extra_fields": "",
+    "examples": "EXAMPLE 1 (Score 4.5):\nResponds fluently with detailed examples, uses a mix of complex and simple structures, and maintains clear pronunciation with natural intonation.\n\nEXAMPLE 2 (Score 2.5):\nProvides short answers with limited detail, makes repeated grammar errors (missing articles, verb tense slips) and pronunciation occasionally obscures meaning.",
+    "guidance": "Highlight practical suggestions for increasing range (synonyms, linking phrases) and note any pronunciation patterns that affect intelligibility."
   }
 }
