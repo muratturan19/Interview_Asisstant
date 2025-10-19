@@ -213,6 +213,13 @@ function App() {
   const [defaultMode, setDefaultMode] = useState('');
   const [evaluationModes, setEvaluationModes] = useState([]);
 
+  const evaluationReady = useMemo(() => {
+    if (!selectedMode) {
+      return false;
+    }
+    return evaluationModes.includes(selectedMode);
+  }, [evaluationModes, selectedMode]);
+
   const [apiKey, setApiKey] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [apiKeyStatus, setApiKeyStatus] = useState({ type: '', message: '' });
@@ -682,9 +689,6 @@ function App() {
     (micState !== 'ready' && micState !== 'listening');
 
   const selectedModeInfo = modes.find((mode) => mode.mode === selectedMode);
-  const evaluationReady = selectedMode
-    ? evaluationModes.includes(selectedMode)
-    : false;
 
   useEffect(() => {
     let cancelled = false;
