@@ -250,7 +250,6 @@ function App() {
     isClient ? null : true,
   );
   const [speechSupportChecked, setSpeechSupportChecked] = useState(() => !isClient);
-  const [canSpeak, setCanSpeak] = useState(false);
   const canSpeakRef = useRef(false);
   const [interviewActive, setInterviewActive] = useState(false);
   const [interviewFinished, setInterviewFinished] = useState(false);
@@ -374,32 +373,6 @@ function App() {
       });
     },
     [ensureVoices, selectVoiceForText],
-  );
-
-  const speakLatestAssistantMessage = useCallback(
-    (historyOverride) => {
-      if (!canSpeakRef.current) {
-        return;
-      }
-
-      const historyToUse = historyOverride ?? chatHistoryRef.current;
-      for (let index = historyToUse.length - 1; index >= 0; index -= 1) {
-        const entry = historyToUse[index];
-        if (entry.role !== 'assistant' || !entry.content) {
-          continue;
-        }
-
-        const signature = `${index}:${entry.content}`;
-        if (lastSpokenSignatureRef.current === signature) {
-          return;
-        }
-
-        lastSpokenSignatureRef.current = signature;
-        speakText(entry.content);
-        return;
-      }
-    },
-    [speakText],
   );
 
   const handleEvaluate = useCallback(
@@ -606,8 +579,7 @@ function App() {
           fullHistory = [...historyAfterUser, assistantMessage];
           updateChatHistory(fullHistory);
           setCurrentQuestion({ prompt: data.reply });
-          updateStatus('', '🔊 Asistan konuşuyor...');
-          speakLatestAssistantMessage(fullHistory);
+          updateStatus('', '📊 Cevap alındı...');
         }
 
         if (data.limit_reached || data.remaining_pairs === 0) {
@@ -646,7 +618,6 @@ function App() {
       selectedMode,
       sessionId,
       speechEnabled,
-      speakLatestAssistantMessage,
       updateChatHistory,
       updateStatus,
     ]
@@ -673,7 +644,7 @@ function App() {
 
     setIsLoadingQuestion(true);
     setError('');
-    updateStatus('', '🎙️ Asistan ilk soruyu hazırlıyor...');
+    updateStatus('', '📊 İlk soru hazırlanıyor...');
     setInterviewFinished(false);
     setEvaluationResult(null);
     setRemainingPairs(null);
@@ -706,8 +677,7 @@ function App() {
       setInterviewActive(true);
 
       if (data.question) {
-        updateStatus('', '🔊 Asistan konuşuyor...');
-        speakLatestAssistantMessage(initialHistory);
+        updateStatus('', '📊 İlk soru hazırlanıyor...');
       }
 
       if (speechEnabled) {
@@ -727,7 +697,6 @@ function App() {
     selectedMode,
     sessionId,
     speechEnabled,
-    speakLatestAssistantMessage,
     updateChatHistory,
     updateStatus,
   ]);
@@ -905,7 +874,6 @@ function App() {
     }
 
     if ('speechSynthesis' in window) {
-      setCanSpeak(true);
       canSpeakRef.current = true;
       ensureVoices();
     }
@@ -1003,21 +971,28 @@ function App() {
   }, [ensureVoices, sendMessageToChat, updateStatus]);
 
   useEffect(() => {
-    if (!currentQuestion?.prompt) {
+    if (!canSpeakRef.current || chatHistory.length === 0) {
       return;
     }
-    speakLatestAssistantMessage();
-  }, [currentQuestion, speakLatestAssistantMessage]);
 
-  useEffect(() => {
-    speakLatestAssistantMessage(chatHistory);
-  }, [chatHistory, speakLatestAssistantMessage]);
-
-  useEffect(() => {
-    if (canSpeak) {
-      speakLatestAssistantMessage();
+    const lastMessage = chatHistory[chatHistory.length - 1];
+    if (lastMessage?.role !== 'assistant' || !lastMessage.content) {
+      return;
     }
-  }, [canSpeak, speakLatestAssistantMessage]);
+
+    const signature = `${chatHistory.length - 1}:${lastMessage.content}`;
+    if (lastSpokenSignatureRef.current === signature) {
+      return;
+    }
+
+    lastSpokenSignatureRef.current = signature;
+
+    const timeoutId = setTimeout(() => {
+      speakText(lastMessage.content);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [chatHistory, speakText]);
 
   const transcriptPreview = useMemo(
     () => formatHistoryForTranscript(chatHistory),
