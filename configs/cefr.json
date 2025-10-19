@@ -54,12 +54,40 @@
   "scale": {
     "label": "CEFR Level",
     "levels": [
-      {"value": "A1", "description": "Can communicate in simple terms with support and slow speech."},
-      {"value": "A2", "description": "Can handle short social exchanges and describe basic needs."},
-      {"value": "B1", "description": "Can deal with most situations while travelling and describe experiences."},
-      {"value": "B2", "description": "Can interact with a degree of fluency and spontaneity on a range of topics."},
-      {"value": "C1", "description": "Can express ideas fluently and spontaneously with flexible language use."},
-      {"value": "C2", "description": "Can present complex information with precision and ease across contexts."}
+      {
+        "value": "A1",
+        "description": "Can communicate in simple terms with support and slow speech."
+      },
+      {
+        "value": "A2",
+        "description": "Can handle short social exchanges and describe basic needs."
+      },
+      {
+        "value": "B1",
+        "description": "Can deal with most situations while travelling and describe experiences."
+      },
+      {
+        "value": "B2",
+        "description": "Can interact with a degree of fluency and spontaneity on a range of topics."
+      },
+      {
+        "value": "C1",
+        "description": "Can express ideas fluently and spontaneously with flexible language use."
+      },
+      {
+        "value": "C2",
+        "description": "Can present complex information with precision and ease across contexts."
+      }
     ]
+  },
+  "evaluation": {
+    "system_prompt": "You are a certified CEFR assessor benchmarking spoken performance against the Council of Europe descriptors.\n\nSCORING GUIDE (A1-C2):\nC2: Effortlessly handles any topic with precision, idiomatic control and persuasive cohesion.\nC1: Flexible language, well-organised responses, rare errors and confident delivery.\nB2: Can develop arguments with supporting detail, occasional hesitation but clear overall.\nB1: Maintains conversations on familiar topics, noticeable pauses and limited range for complex ideas.\nA2: Handles simple exchanges with memorised phrases, breakdowns when elaborating.\nA1: Relies on single words or rehearsed statements, heavy support needed.\n\nFocus on how well the speaker sustains interaction, expands on ideas and self-corrects.",
+    "overall_scale": "CEFR A1-C2",
+    "criterion_template": "{\n    \"interaction_management\": {\"score\": <number 1-5>, \"descriptor\": \"<A1-C2>\"},\n    \"accuracy\": {\"score\": <number 1-5>, \"descriptor\": \"<A1-C2>\"},\n    \"range\": {\"score\": <number 1-5>, \"descriptor\": \"<A1-C2>\"},\n    \"fluency\": {\"score\": <number 1-5>, \"descriptor\": \"<A1-C2>\"}\n}",
+    "equivalent_template": "{\n    \"ielts_band\": <number 0-9>,\n    \"toefl_total\": <number 0-30>,\n    \"business_score\": <number 0-100>\n}",
+    "question_max": 5,
+    "extra_fields": ",\n    \"recommended_level\": \"<A1/A2/B1/B2/C1/C2>\",\n    \"can_do_statements\": [\"descriptor1\", \"descriptor2\"],",
+    "examples": "EXAMPLE 1 (Level C1):\nSustains long turns with cohesive devices, reformulates when searching for words, and integrates advanced vocabulary naturally.\n\nEXAMPLE 2 (Level B1-):\nCommunicates main ideas but struggles with complex grammar, repeats phrases, and pauses frequently to search for vocabulary.",
+    "guidance": "Map evidence directly to CEFR can-do statements. Mention whether performance is secure, emerging or below the claimed level."
   }
 }

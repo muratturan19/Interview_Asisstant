@@ -30,20 +30,56 @@
     }
   ],
   "criteria": [
-    {"name": "Professional Communication", "description": "Clarity, tone and ability to frame messages for stakeholders."},
-    {"name": "Business Vocabulary", "description": "Use of industry terminology, concise phrasing and persuasive language."},
-    {"name": "Strategic Thinking", "description": "Ability to prioritise, propose solutions and consider stakeholder impact."},
-    {"name": "Leadership Presence", "description": "Confidence, empathy and influence demonstrated in speech."}
+    {
+      "name": "Professional Communication",
+      "description": "Clarity, tone and ability to frame messages for stakeholders."
+    },
+    {
+      "name": "Business Vocabulary",
+      "description": "Use of industry terminology, concise phrasing and persuasive language."
+    },
+    {
+      "name": "Strategic Thinking",
+      "description": "Ability to prioritise, propose solutions and consider stakeholder impact."
+    },
+    {
+      "name": "Leadership Presence",
+      "description": "Confidence, empathy and influence demonstrated in speech."
+    }
   ],
   "scale": {
     "label": "Readiness Level",
     "levels": [
-      {"value": 50, "description": "Entry-level communicator who needs guided structure."},
-      {"value": 65, "description": "Developing professional who can handle standard updates."},
-      {"value": 75, "description": "Confident communicator with clear business vocabulary."},
-      {"value": 85, "description": "Strategic partner able to influence stakeholders effectively."},
-      {"value": 95, "description": "Executive-level communicator ready for complex negotiations."}
+      {
+        "value": 50,
+        "description": "Entry-level communicator who needs guided structure."
+      },
+      {
+        "value": 65,
+        "description": "Developing professional who can handle standard updates."
+      },
+      {
+        "value": 75,
+        "description": "Confident communicator with clear business vocabulary."
+      },
+      {
+        "value": 85,
+        "description": "Strategic partner able to influence stakeholders effectively."
+      },
+      {
+        "value": 95,
+        "description": "Executive-level communicator ready for complex negotiations."
+      }
     ]
+  },
+  "evaluation": {
+    "system_prompt": "You are a corporate communication trainer specializing in Business English assessment.\n\nEVALUATION AREAS (0-100 scale):\n1. Professional Communication (25%): Appropriate formality, politeness, directness\n2. Business Vocabulary (25%): Industry terms, corporate jargon, professional expressions\n3. Clarity & Structure (20%): Organized thoughts, clear main points, logical flow\n4. Meeting & Presentation Skills (15%): Confidence, engagement, persuasiveness\n5. Email/Written Parallels (15%): Formal structures that translate to business writing\n\nSCORING LEVELS:\n90-100: Executive level, ready for C-suite communication\n80-89: Senior professional, can handle complex business scenarios\n70-79: Mid-level professional, effective in standard business contexts\n60-69: Junior professional, needs development in advanced scenarios\n50-59: Entry level, requires significant improvement\nBelow 50: Not yet ready for professional business communication\n\nProvide detailed feedback on professional strengths and development areas.",
+    "overall_scale": "0-100",
+    "criterion_template": "{\n    \"professional_communication\": {\"score\": <number 0-100>, \"weight\": 0.25},\n    \"business_vocabulary\": {\"score\": <number 0-100>, \"weight\": 0.25},\n    \"clarity_structure\": {\"score\": <number 0-100>, \"weight\": 0.2},\n    \"meeting_skills\": {\"score\": <number 0-100>, \"weight\": 0.15},\n    \"confidence\": {\"score\": <number 0-100>, \"weight\": 0.15}\n}",
+    "equivalent_template": "{\n    \"toefl_total\": <number 0-30>,\n    \"ielts_band\": <number 0-9>,\n    \"casual_score\": <number 0-100>\n}",
+    "question_max": 100,
+    "extra_fields": ",\n    \"professional_level\": \"<Entry/Junior/Mid/Senior/Executive>\",\n    \"recommended_roles\": [\"role1\", \"role2\"],",
+    "examples": "EXAMPLE 1 (Score 92):\nClear executive presence, uses terms like \"stakeholder alignment\" and \"quarterly runway\", structures responses with signposting, and demonstrates confident delivery appropriate for board-level meetings.\n\nEXAMPLE 2 (Score 58):\nOverly informal tone in a leadership context, limited business vocabulary, ideas presented without clear structure, and responses lack persuasive impact.",
+    "guidance": "Adopt a corporate tone, align feedback with leadership competencies, and explain how the candidate performs in meetings, presentations, and stakeholder updates."
   }
 }
-

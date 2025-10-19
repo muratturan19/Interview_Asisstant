@@ -47,6 +47,16 @@ class ConfigManager:
             self._cache[key] = data
         return self._cache[key]
 
+    def has_mode(self, mode: str) -> bool:
+        """Return whether the requested mode exists."""
+
+        return mode.lower() in self._config_files
+
+    def get_config(self, mode: str) -> Dict[str, Any]:
+        """Return the raw configuration dictionary for a mode."""
+
+        return self._load_config(mode)
+
     def available_modes(self) -> Iterable[str]:
         """Return the available configuration modes."""
 
@@ -78,6 +88,51 @@ class ConfigManager:
         if not isinstance(prompt, str):
             raise ValueError(f"Mode '{mode}' does not define a valid evaluation prompt.")
         return prompt
+
+    def has_evaluation_config(self, mode: str) -> bool:
+        """Return whether a mode defines evaluation metadata."""
+
+        config = self._load_config(mode)
+        evaluation = config.get("evaluation")
+        return isinstance(evaluation, dict) and bool(evaluation)
+
+    def get_evaluation_config(self, mode: str) -> Dict[str, Any]:
+        """Return structured evaluation metadata for the requested mode."""
+
+        config = self._load_config(mode)
+        evaluation = config.get("evaluation")
+        if not isinstance(evaluation, dict):
+            raise ValueError(f"Mode '{mode}' does not provide evaluation metadata.")
+
+        required_fields = {
+            "system_prompt": str,
+            "overall_scale": str,
+            "criterion_template": str,
+            "equivalent_template": str,
+            "question_max": (int, float),
+            "examples": str,
+            "guidance": str,
+        }
+
+        result: Dict[str, Any] = {}
+        for field, expected_type in required_fields.items():
+            value = evaluation.get(field)
+            if not isinstance(value, expected_type):
+                raise ValueError(
+                    f"Mode '{mode}' is missing required evaluation field '{field}'."
+                )
+            result[field] = value
+
+        result["question_max"] = int(result["question_max"])
+
+        extra_fields = evaluation.get("extra_fields", "")
+        if not isinstance(extra_fields, str):
+            raise ValueError(
+                f"Mode '{mode}' must define 'extra_fields' as a string if provided."
+            )
+        result["extra_fields"] = extra_fields
+
+        return result
 
     def get_criteria(self, mode: str) -> List[Dict[str, Any]]:
         """Return the evaluation criteria for the requested mode."""
@@ -117,6 +172,29 @@ class ConfigManager:
             "part": selected_part.get("part", ""),
             "prompt": selected_prompt,
         }
+
+    def serialise_mode(self, mode: str) -> Dict[str, Any]:
+        """Return a JSON-ready summary for the requested mode."""
+
+        config = self._load_config(mode)
+        description = self.get_description(mode)
+        criteria = self.get_criteria(mode)
+        scale = self.get_scale(mode)
+        title = config.get("title")
+        evaluation_available = self.has_evaluation_config(mode)
+
+        payload: Dict[str, Any] = {
+            "mode": mode,
+            "description": description,
+            "criteria": criteria,
+            "scale": scale,
+            "evaluation_available": evaluation_available,
+        }
+
+        if isinstance(title, str) and title.strip():
+            payload["title"] = title
+
+        return payload
 
 
 config_manager = ConfigManager()

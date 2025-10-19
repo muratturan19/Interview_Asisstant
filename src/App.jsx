@@ -210,6 +210,8 @@ function App() {
   const [modes, setModes] = useState([]);
   const [modeError, setModeError] = useState('');
   const [selectedMode, setSelectedMode] = useState('');
+  const [defaultMode, setDefaultMode] = useState('');
+  const [evaluationModes, setEvaluationModes] = useState([]);
 
   const [apiKey, setApiKey] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
@@ -294,6 +296,11 @@ function App() {
         return false;
       }
 
+      if (!evaluationReady) {
+        setEvaluationError('Seçilen mod için otomatik değerlendirme desteklenmiyor.');
+        return false;
+      }
+
       const transcriptSource = transcriptOverride ?? evaluationTranscript;
       const transcript = transcriptSource.trim();
 
@@ -353,7 +360,7 @@ function App() {
         setIsEvaluating(false);
       }
     },
-    [apiKey, evaluationTranscript, hasStoredApiKey, selectedMode, updateStatus]
+    [apiKey, evaluationReady, evaluationTranscript, hasStoredApiKey, selectedMode, updateStatus]
   );
 
   const finalizeInterview = useCallback(
@@ -666,6 +673,9 @@ function App() {
     (micState !== 'ready' && micState !== 'listening');
 
   const selectedModeInfo = modes.find((mode) => mode.mode === selectedMode);
+  const evaluationReady = selectedMode
+    ? evaluationModes.includes(selectedMode)
+    : false;
 
   useEffect(() => {
     let cancelled = false;
@@ -680,8 +690,28 @@ function App() {
         const data = await response.json();
         if (!cancelled) {
           const receivedModes = data?.modes ?? [];
+          const availableIds = new Set(receivedModes.map((mode) => mode.mode));
+
+          const preferredFromResponse = data?.default_mode || '';
+          const preferredMode = availableIds.has(preferredFromResponse)
+            ? preferredFromResponse
+            : receivedModes[0]?.mode ?? '';
+
+          const evaluationList = receivedModes
+            .filter((mode) => {
+              if (Array.isArray(data?.evaluation_modes)) {
+                return data.evaluation_modes.includes(mode.mode);
+              }
+              return Boolean(mode.evaluation_available);
+            })
+            .map((mode) => mode.mode);
+
           setModes(receivedModes);
-          setSelectedMode((prev) => prev || (receivedModes[0]?.mode ?? ''));
+          setDefaultMode(preferredMode);
+          setEvaluationModes(evaluationList);
+          setSelectedMode((prev) =>
+            prev && availableIds.has(prev) ? prev : preferredMode
+          );
         }
       } catch (err) {
         if (!cancelled) {
@@ -698,6 +728,19 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!modes.length) {
+      return;
+    }
+
+    setSelectedMode((prev) => {
+      if (prev && modes.some((mode) => mode.mode === prev)) {
+        return prev;
+      }
+      return defaultMode || modes[0].mode;
+    });
+  }, [modes, defaultMode]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const checkStatus = async () => {
@@ -709,7 +752,15 @@ function App() {
         const data = await response.json();
         if (!cancelled) {
           setHasStoredApiKey(Boolean(data.has_key));
-          setSelectedMode((prev) => prev || data.last_mode || prev);
+          if (data.default_mode) {
+            setDefaultMode((prev) => prev || data.default_mode);
+          }
+          setSelectedMode((prev) => {
+            if (prev) {
+              return prev;
+            }
+            return data.last_mode || data.default_mode || prev;
+          });
           if (data.has_key) {
             setApiKeyStatus({
               type: 'success',
@@ -850,7 +901,12 @@ function App() {
 
       <main>
         <section className="card">
-          <h2>1. Mod Seçimi</h2>
+          <div className="section-header">
+            <h2>1. Mod Seçimi</h2>
+            {modes.length > 0 && (
+              <span className="mode-count muted">{modes.length} mod hazır</span>
+            )}
+          </div>
           {modeError && <p className="error">{modeError}</p>}
           <label className="field">
             <span>Değerlendirme modu</span>
@@ -858,16 +914,24 @@ function App() {
               <option value="" disabled>
                 Bir mod seçin
               </option>
-              {modes.map((mode) => (
-                <option key={mode.mode} value={mode.mode}>
-                  {mode.mode.toUpperCase()}
-                </option>
-              ))}
+              {modes.map((mode) => {
+                const label = mode.title || mode.mode.toUpperCase();
+                return (
+                  <option key={mode.mode} value={mode.mode}>
+                    {label}
+                  </option>
+                );
+              })}
             </select>
           </label>
           {selectedModeInfo && (
             <div className="mode-details">
               <p>{selectedModeInfo.description}</p>
+              <p className="muted">
+                {selectedModeInfo.evaluation_available
+                  ? 'Otomatik değerlendirme destekleniyor.'
+                  : 'Bu mod şu an sadece soru pratiği sağlar.'}
+              </p>
               <CriteriaList criteria={selectedModeInfo.criteria} />
               <ScaleDetails scale={selectedModeInfo.scale} />
             </div>
@@ -988,9 +1052,19 @@ function App() {
             value={evaluationTranscript}
             onChange={handleTranscriptChange}
           />
-          <button type="button" onClick={() => handleEvaluate()} disabled={isEvaluating}>
+          <button
+            type="button"
+            onClick={() => handleEvaluate()}
+            disabled={isEvaluating || !evaluationReady}
+          >
             {isEvaluating ? 'Değerlendiriliyor...' : 'Değerlendir'}
           </button>
+
+          {!evaluationReady && selectedMode && (
+            <p className="status info">
+              Bu mod için değerlendirme yakında. Lütfen değerlendirme desteklenen bir mod seçin.
+            </p>
+          )}
 
           {evaluationResult && (
             <div className="evaluation-results">

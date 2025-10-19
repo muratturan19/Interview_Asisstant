@@ -30,18 +30,52 @@
     }
   ],
   "criteria": [
-    {"name": "Delivery", "description": "Pace, fluidity, and intelligibility of the response."},
-    {"name": "Language Use", "description": "Vocabulary and grammar used to express ideas accurately."},
-    {"name": "Topic Development", "description": "Organization, detail, and clarity when developing responses."}
+    {
+      "name": "Delivery",
+      "description": "Pace, fluidity, and intelligibility of the response."
+    },
+    {
+      "name": "Language Use",
+      "description": "Vocabulary and grammar used to express ideas accurately."
+    },
+    {
+      "name": "Topic Development",
+      "description": "Organization, detail, and clarity when developing responses."
+    }
   ],
   "scale": {
     "label": "TOEFL Score",
     "levels": [
-      {"value": 0, "description": "No attempt or irrelevant response."},
-      {"value": 1, "description": "Serious delivery problems and limited content."},
-      {"value": 2, "description": "Basic development with frequent language errors."},
-      {"value": 3, "description": "Generally organized with some language mistakes."},
-      {"value": 4, "description": "Well-developed response with minor lapses."}
+      {
+        "value": 0,
+        "description": "No attempt or irrelevant response."
+      },
+      {
+        "value": 1,
+        "description": "Serious delivery problems and limited content."
+      },
+      {
+        "value": 2,
+        "description": "Basic development with frequent language errors."
+      },
+      {
+        "value": 3,
+        "description": "Generally organized with some language mistakes."
+      },
+      {
+        "value": 4,
+        "description": "Well-developed response with minor lapses."
+      }
     ]
+  },
+  "evaluation": {
+    "system_prompt": "You are a certified TOEFL iBT Speaking examiner with 15+ years of experience.\n\nSCORING GUIDE (0-4 scale per question):\n4 (Good): Speech is generally clear and fluid. Minor lapses in grammar/vocabulary don't obscure meaning. Response is well-organized and developed with appropriate detail.\n\n3 (Fair): Speech is generally clear with some fluidity. Grammar/vocabulary sometimes limits ability to express ideas clearly. Response shows basic development but may lack detail or clarity.\n\n2 (Limited): Speech lacks clarity and fluidity. Limited grammar/vocabulary significantly affects expression. Response is limited in content and development.\n\n1 (Weak): Very little relevant content. Speech is unclear. Severe problems with grammar/vocabulary.\n\n0: No attempt or completely off-topic.\n\nEVALUATION CRITERIA:\n- Delivery (15%): Pace, clarity, pronunciation, intonation\n- Language Use (40%): Grammar accuracy, vocabulary range and precision, sentence complexity\n- Topic Development (45%): Relevance, organization, coherence, supporting details\n\nProvide scores for each question (0-4), calculate total (sum * 1.5 = /30), and CEFR level.",
+    "overall_scale": "0-30",
+    "criterion_template": "{\n    \"delivery\": {\"score\": <number 0-4>, \"max_score\": 4, \"weight\": 0.15},\n    \"language_use\": {\"score\": <number 0-4>, \"max_score\": 4, \"weight\": 0.4},\n    \"topic_development\": {\"score\": <number 0-4>, \"max_score\": 4, \"weight\": 0.45}\n}",
+    "equivalent_template": "{\n    \"ielts_band\": <number 0-9>,\n    \"business_score\": <number 0-100>,\n    \"casual_score\": <number 0-100>\n}",
+    "question_max": 4,
+    "extra_fields": "",
+    "examples": "EXAMPLE 1 (Score 4):\nQ: Describe your hometown.\nA: \"I'm from Istanbul, which is a fascinating city that bridges Europe and Asia. It has a rich history dating back thousands of years, with landmarks like the Hagia Sophia and Blue Mosque. The city offers a unique blend of traditional and modern culture, and the food scene is absolutely incredible. I particularly love the vibrant neighborhoods along the Bosphorus.\"\nReasoning: Clear delivery, varied vocabulary (fascinating, bridges, landmarks), complex structures, well-organized response with specific details.\n\nEXAMPLE 2 (Score 2):\nQ: Describe your hometown.\nA: \"My hometown is... um... it's big city. Has many building and people. I like it because... uh... it is nice. Many restaurant and shop there. People is friendly.\"\nReasoning: Frequent errors (many building, people is), limited vocabulary, choppy delivery with many hesitations, minimal development.",
+    "guidance": "Focus on academic tone, cite specific sentences that demonstrate vocabulary precision or organizational clarity, and ensure total TOEFL score is the sum of question scores multiplied by 1.5."
   }
 }
