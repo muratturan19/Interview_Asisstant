@@ -964,6 +964,13 @@ function App() {
   }, [chatHistory, evaluationTouched]);
 
   useEffect(() => {
+    if (!currentQuestion?.prompt) {
+      return;
+    }
+    speakLatestAssistantMessage();
+  }, [currentQuestion, speakLatestAssistantMessage]);
+
+  useEffect(() => {
     speakLatestAssistantMessage(chatHistory);
   }, [chatHistory, speakLatestAssistantMessage]);
 
@@ -1023,44 +1030,43 @@ function App() {
           )}
         </section>
 
-        <section className="card">
-          <h2>2. API Anahtarı</h2>
-          <label className="field">
-            <span>Anthropic API Key</span>
-            <div className="api-input-row">
-              <input
-                type={apiKeyVisible ? 'text' : 'password'}
-                placeholder="sk-ant-..."
-                value={apiKey}
-                onChange={(event) => setApiKey(event.target.value)}
-                autoComplete="off"
-              />
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => setApiKeyVisible((prev) => !prev)}
-              >
-                {apiKeyVisible ? 'Gizle' : 'Göster'}
+        {!hasStoredApiKey && (
+          <section className="card">
+            <h2>2. API Anahtarı</h2>
+            <label className="field">
+              <span>Anthropic API Key</span>
+              <div className="api-input-row">
+                <input
+                  type={apiKeyVisible ? 'text' : 'password'}
+                  placeholder="sk-ant-..."
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setApiKeyVisible((prev) => !prev)}
+                >
+                  {apiKeyVisible ? 'Gizle' : 'Göster'}
+                </button>
+              </div>
+            </label>
+            <div className="api-actions">
+              <button type="button" className="secondary" onClick={handleSaveApiKey}>
+                API Anahtarını Kaydet
               </button>
             </div>
-          </label>
-          <div className="api-actions">
-            <button type="button" className="secondary" onClick={handleSaveApiKey}>
-              API Anahtarını Kaydet
-            </button>
-          </div>
-          {apiKeyStatus.message && (
-            <p className={`status ${apiKeyStatus.type}`}>{apiKeyStatus.message}</p>
-          )}
-          {hasStoredApiKey && (
-            <p className="status info">Sunucuda kayıtlı anahtar otomatik olarak kullanılacak.</p>
-          )}
-          {missingApiKey && (
-            <p className="status error">
-              Mülakatı başlatmak için geçerli bir Anthropic API anahtarı gereklidir.
-            </p>
-          )}
-        </section>
+            {apiKeyStatus.message && (
+              <p className={`status ${apiKeyStatus.type}`}>{apiKeyStatus.message}</p>
+            )}
+            {missingApiKey && (
+              <p className="status error">
+                Mülakatı başlatmak için geçerli bir Anthropic API anahtarı gereklidir.
+              </p>
+            )}
+          </section>
+        )}
 
         <section className="card">
           <div className="section-header">
@@ -1073,6 +1079,12 @@ function App() {
               {isLoadingQuestion ? 'Yükleniyor...' : 'İlk Soruyu Al'}
             </button>
           </div>
+          {hasStoredApiKey && (
+            <p className={`status ${apiKeyStatus.type || 'info'}`}>
+              {apiKeyStatus.message ||
+                'Sunucuda kayıtlı bir Anthropic API anahtarı bulundu. Sorular bu anahtarla yürütülecek.'}
+            </p>
+          )}
           {error && <p className="error">{error}</p>}
           {interviewStatus.text && (
             <p className={`status ${interviewStatus.type}`}>{interviewStatus.text}</p>
