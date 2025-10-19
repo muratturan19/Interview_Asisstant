@@ -285,24 +285,95 @@ function App() {
     [updateStatus]
   );
 
-  const speakText = useCallback((text) => {
-    return new Promise((resolve) => {
+  const voicesLoadedRef = useRef(false);
+  const voicesLoadingRef = useRef(null);
+
+  const ensureVoices = useCallback(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      return Promise.resolve();
+    }
+
+    if (voicesLoadedRef.current && window.speechSynthesis.getVoices().length > 0) {
+      return Promise.resolve();
+    }
+
+    if (!voicesLoadingRef.current) {
+      voicesLoadingRef.current = new Promise((resolve) => {
+        const handleVoices = () => {
+          voicesLoadedRef.current = true;
+          window.speechSynthesis.removeEventListener('voiceschanged', handleVoices);
+          resolve();
+        };
+
+        const existingVoices = window.speechSynthesis.getVoices();
+        if (existingVoices.length > 0) {
+          voicesLoadedRef.current = true;
+          resolve();
+          return;
+        }
+
+        window.speechSynthesis.addEventListener('voiceschanged', handleVoices);
+        window.speechSynthesis.getVoices();
+
+        setTimeout(() => {
+          window.speechSynthesis.removeEventListener('voiceschanged', handleVoices);
+          resolve();
+        }, 1000);
+      });
+    }
+
+    return voicesLoadingRef.current;
+  }, []);
+
+  const selectVoiceForText = useCallback((text) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      return null;
+    }
+
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) {
+      return null;
+    }
+
+    const hasTurkishChars = /[ğüşöçıİĞÜŞÖÇ]/i.test(text || '');
+    const targetPrefix = hasTurkishChars ? 'tr' : 'en';
+    return (
+      voices.find((voice) => voice.lang?.toLowerCase().startsWith(targetPrefix)) ||
+      voices.find((voice) => voice.default) ||
+      voices[0]
+    );
+  }, []);
+
+  const speakText = useCallback(
+    (text) => {
       if (!text || !canSpeakRef.current || typeof window === 'undefined') {
-        resolve();
-        return;
+        return Promise.resolve();
       }
 
-      const utterance = new window.SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.95;
-      utterance.pitch = 1;
-      utterance.onend = resolve;
-      utterance.onerror = resolve;
+      return ensureVoices().then(() => {
+        return new Promise((resolve) => {
+          const utterance = new window.SpeechSynthesisUtterance(text);
+          const selectedVoice = selectVoiceForText(text);
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            utterance.lang = selectedVoice.lang;
+          } else {
+            utterance.lang = /[ğüşöçıİĞÜŞÖÇ]/i.test(text) ? 'tr-TR' : 'en-US';
+          }
 
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    });
-  }, []);
+          utterance.rate = 0.95;
+          utterance.pitch = 1;
+          utterance.onend = resolve;
+          utterance.onerror = resolve;
+
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.resume();
+          window.speechSynthesis.speak(utterance);
+        });
+      });
+    },
+    [ensureVoices, selectVoiceForText],
+  );
 
   const speakLatestAssistantMessage = useCallback(
     (historyOverride) => {
@@ -865,6 +936,7 @@ function App() {
     if ('speechSynthesis' in window) {
       setCanSpeak(true);
       canSpeakRef.current = true;
+      ensureVoices();
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -955,7 +1027,7 @@ function App() {
       recognition.stop();
       window.speechSynthesis?.cancel();
     };
-  }, [sendMessageToChat, updateStatus]);
+  }, [ensureVoices, sendMessageToChat, updateStatus]);
 
   useEffect(() => {
     if (!evaluationTouched) {
