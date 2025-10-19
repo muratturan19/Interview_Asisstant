@@ -30,7 +30,7 @@ In a second terminal start the Vite dev server (serves on `http://localhost:5173
 npm run dev
 ```
 
-Open [`http://localhost:5173/interview.html`](http://localhost:5173/interview.html) to use the UI.
+Open [`http://localhost:5173/`](http://localhost:5173/) to use the UI.
 
 ## Configuring credentials and preferences
 
@@ -84,7 +84,7 @@ Create an optimised UI bundle with:
 ```bash
 npm run build
 ```
-The assets will be emitted to `dist/` along with a processed `interview.html` wrapper that points at the built scripts.
+The assets will be emitted to `dist/` along with a processed `index.html` wrapper that points at the built scripts.
 
 ## Tests
 
