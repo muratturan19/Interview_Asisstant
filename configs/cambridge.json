@@ -30,19 +30,56 @@
     }
   ],
   "criteria": [
-    {"name": "Grammar and Vocabulary", "description": "Accuracy and range of language used to express ideas."},
-    {"name": "Discourse Management", "description": "Ability to organise ideas coherently and extend responses."},
-    {"name": "Pronunciation", "description": "Control of stress, intonation, and clarity in speech."},
-    {"name": "Interactive Communication", "description": "Effectiveness in initiating, responding, and maintaining interaction."}
+    {
+      "name": "Grammar and Vocabulary",
+      "description": "Accuracy and range of language used to express ideas."
+    },
+    {
+      "name": "Discourse Management",
+      "description": "Ability to organise ideas coherently and extend responses."
+    },
+    {
+      "name": "Pronunciation",
+      "description": "Control of stress, intonation, and clarity in speech."
+    },
+    {
+      "name": "Interactive Communication",
+      "description": "Effectiveness in initiating, responding, and maintaining interaction."
+    }
   ],
   "scale": {
     "label": "Cambridge Level",
     "levels": [
-      {"value": "A2 Key", "description": "Communicates simple information with support."},
-      {"value": "B1 Preliminary", "description": "Handles everyday situations with some hesitation."},
-      {"value": "B2 First", "description": "Communicates effectively with occasional errors."},
-      {"value": "C1 Advanced", "description": "Expresses ideas fluently with well-organised discourse."},
-      {"value": "C2 Proficiency", "description": "Communicates with sophistication, precision, and natural control."}
+      {
+        "value": "A2 Key",
+        "description": "Communicates simple information with support."
+      },
+      {
+        "value": "B1 Preliminary",
+        "description": "Handles everyday situations with some hesitation."
+      },
+      {
+        "value": "B2 First",
+        "description": "Communicates effectively with occasional errors."
+      },
+      {
+        "value": "C1 Advanced",
+        "description": "Expresses ideas fluently with well-organised discourse."
+      },
+      {
+        "value": "C2 Proficiency",
+        "description": "Communicates with sophistication, precision, and natural control."
+      }
     ]
+  },
+  "evaluation": {
+    "system_prompt": "You are a Cambridge speaking examiner evaluating according to the B2 First / C1 Advanced performance descriptors.\n\nSCORING OVERVIEW (0-5 scale per criterion):\n5: Consistently strong performance, flexible language and clear development of ideas.\n4: Generally effective with minor lapses that do not impede communication.\n3: Adequate response with moments of hesitation or limited range.\n2: Noticeable strain, frequent reformulation and limited control of structures.\n1: Fragmented responses, heavy support required.\n0: No meaningful communication.\n\nPay attention to interactional strategies, clarity of extended turns and ability to paraphrase when needed.",
+    "overall_scale": "Cambridge 0-5",
+    "criterion_template": "{\n    \"grammatical_resource\": {\"score\": <number 0-5>, \"max_score\": 5},\n    \"lexical_resource\": {\"score\": <number 0-5>, \"max_score\": 5},\n    \"discourse_management\": {\"score\": <number 0-5>, \"max_score\": 5},\n    \"interactive_communication\": {\"score\": <number 0-5>, \"max_score\": 5},\n    \"pronunciation\": {\"score\": <number 0-5>, \"max_score\": 5}\n}",
+    "equivalent_template": "{\n    \"cefr_level\": \"<B1/B2/C1/C2>\",\n    \"ielts_band\": <number 0-9>,\n    \"toefl_total\": <number 0-30>\n}",
+    "question_max": 5,
+    "extra_fields": "",
+    "examples": "EXAMPLE 1 (Score 4.5):\nDelivers extended turns with cohesive devices, responds promptly to partner prompts and demonstrates wide lexical control.\n\nEXAMPLE 2 (Score 2.0):\nProvides short answers, repeats vocabulary, needs prompting to continue and mispronounces key sounds.",
+    "guidance": "Reference Cambridge band descriptors directly, cite examples of collaborative language (asking questions, linking ideas) and comment on how effectively the candidate manages their long turn."
   }
 }

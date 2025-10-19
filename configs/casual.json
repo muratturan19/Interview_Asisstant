@@ -30,20 +30,56 @@
     }
   ],
   "criteria": [
-    {"name": "Natural Flow", "description": "Conversational rhythm, pauses, hesitations and use of fillers."},
-    {"name": "Idioms & Expressions", "description": "Use of phrasal verbs, colloquial phrases and contractions."},
-    {"name": "Cultural Awareness", "description": "References to shared experiences, media or cultural touchpoints."},
-    {"name": "Authenticity", "description": "Does the response feel spontaneous and relatable?"}
+    {
+      "name": "Natural Flow",
+      "description": "Conversational rhythm, pauses, hesitations and use of fillers."
+    },
+    {
+      "name": "Idioms & Expressions",
+      "description": "Use of phrasal verbs, colloquial phrases and contractions."
+    },
+    {
+      "name": "Cultural Awareness",
+      "description": "References to shared experiences, media or cultural touchpoints."
+    },
+    {
+      "name": "Authenticity",
+      "description": "Does the response feel spontaneous and relatable?"
+    }
   ],
   "scale": {
     "label": "Comfort Level",
     "levels": [
-      {"value": 50, "description": "Understandable but sounds formal or rehearsed."},
-      {"value": 65, "description": "Comfortable with casual topics but still searching for expressions."},
-      {"value": 75, "description": "Natural flow with occasional informal expressions."},
-      {"value": 85, "description": "Very natural conversation partner with idiomatic usage."},
-      {"value": 95, "description": "Sounds like a native friend telling stories."}
+      {
+        "value": 50,
+        "description": "Understandable but sounds formal or rehearsed."
+      },
+      {
+        "value": 65,
+        "description": "Comfortable with casual topics but still searching for expressions."
+      },
+      {
+        "value": 75,
+        "description": "Natural flow with occasional informal expressions."
+      },
+      {
+        "value": 85,
+        "description": "Very natural conversation partner with idiomatic usage."
+      },
+      {
+        "value": 95,
+        "description": "Sounds like a native friend telling stories."
+      }
     ]
+  },
+  "evaluation": {
+    "system_prompt": "You are a native English speaker evaluating natural, everyday conversation ability.\n\nEVALUATION CRITERIA (0-100 scale):\n1. Natural Flow (30%): Sounds like a real conversation, not scripted/formal\n2. Idioms & Expressions (20%): Uses common sayings, phrasal verbs, colloquialisms\n3. Cultural Awareness (15%): References to culture, current events, shared knowledge\n4. Informal Language (20%): Contractions, slang (appropriate), casual vocabulary\n5. Authenticity (15%): Would pass as native-like in casual settings\n\nSCORING LEVELS:\n90-100: Near-native, sounds completely natural\n80-89: Advanced, very comfortable and natural\n70-79: Upper-intermediate, mostly natural with minor awkwardness\n60-69: Intermediate, understandable but noticeably non-native\n50-59: Basic, struggles with informal contexts\nBelow 50: Too formal or limited for casual conversation\n\nLook for: \"gonna\", \"wanna\", \"kinda\", phrasal verbs, natural reactions, filler words (um, like, you know).",
+    "overall_scale": "0-100",
+    "criterion_template": "{\n    \"natural_flow\": {\"score\": <number 0-100>, \"weight\": 0.3},\n    \"idiom_usage\": {\"score\": <number 0-100>, \"weight\": 0.2},\n    \"cultural_awareness\": {\"score\": <number 0-100>, \"weight\": 0.15},\n    \"informal_language\": {\"score\": <number 0-100>, \"weight\": 0.2},\n    \"authenticity\": {\"score\": <number 0-100>, \"weight\": 0.15}\n}",
+    "equivalent_template": "{\n    \"toefl_total\": <number 0-30>,\n    \"ielts_band\": <number 0-9>,\n    \"business_score\": <number 0-100>\n}",
+    "question_max": 100,
+    "extra_fields": ",\n    \"native_likeness\": <number 0-100>,\n    \"idiom_examples\": [\"example1\", \"example2\"],",
+    "examples": "EXAMPLE 1 (Score 88):\nSpeaks with relaxed rhythm, uses idioms such as \"hit the nail on the head\" and phrasal verbs like \"hang out\", references popular shows naturally, and sounds spontaneous.\n\nEXAMPLE 2 (Score 52):\nOverly formal phrases, minimal idiom usage, responses feel rehearsed, and limited cultural references make the conversation sound unnatural.",
+    "guidance": "Focus on informal markers such as contractions, filler words, and cultural references. Highlight idioms or slang that stood out, and comment on how natural the conversation felt."
   }
 }
-

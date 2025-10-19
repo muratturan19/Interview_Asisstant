@@ -22,215 +22,51 @@ from configs import config_manager
 LAST_MODE_KEY = "LAST_EVALUATION_MODE"
 
 
-TOEFL_SYSTEM = """You are a certified TOEFL iBT Speaking examiner with 15+ years of experience.
+def _all_modes() -> tuple[str, ...]:
+    """Return all configured interview modes."""
 
-SCORING GUIDE (0-4 scale per question):
-4 (Good): Speech is generally clear and fluid. Minor lapses in grammar/vocabulary don't obscure meaning. Response is well-organized and developed with appropriate detail.
-
-3 (Fair): Speech is generally clear with some fluidity. Grammar/vocabulary sometimes limits ability to express ideas clearly. Response shows basic development but may lack detail or clarity.
-
-2 (Limited): Speech lacks clarity and fluidity. Limited grammar/vocabulary significantly affects expression. Response is limited in content and development.
-
-1 (Weak): Very little relevant content. Speech is unclear. Severe problems with grammar/vocabulary.
-
-0: No attempt or completely off-topic.
-
-EVALUATION CRITERIA:
-- Delivery (15%): Pace, clarity, pronunciation, intonation
-- Language Use (40%): Grammar accuracy, vocabulary range and precision, sentence complexity
-- Topic Development (45%): Relevance, organization, coherence, supporting details
-
-Provide scores for each question (0-4), calculate total (sum * 1.5 = /30), and CEFR level.
-"""
-
-IELTS_SYSTEM = """You are an official IELTS Speaking examiner certified by British Council/IDP.
-
-BAND DESCRIPTORS (0-9 scale, use 0.5 increments):
-
-Band 9 (Expert): Full operational command, appropriate, accurate, and fluent.
-Band 8 (Very Good): Fully operational with occasional inaccuracies.
-Band 7 (Good): Operational command, occasional inaccuracies, some complex language.
-Band 6 (Competent): Effective command despite inaccuracies, can use complex language.
-Band 5 (Modest): Partial command, frequent errors, basic meaning usually clear.
-Band 4 (Limited): Very limited to familiar situations, frequent communication breakdowns.
-Band 3 (Extremely Limited): Conveys only general meaning in familiar situations.
-Band 2-1: Essentially no communication possible.
-
-ASSESSMENT CRITERIA (Equal 25% each):
-1. Fluency & Coherence: Flow, linking, self-correction, hesitation
-2. Lexical Resource: Vocabulary range, precision, collocations, paraphrasing
-3. Grammatical Range & Accuracy: Complexity, structures, error-free sentences
-4. Pronunciation: Sounds, word stress, intonation, intelligibility
-
-Provide individual criterion scores and overall band (average, rounded to 0.5).
-"""
-
-BUSINESS_SYSTEM = """You are a corporate communication trainer specializing in Business English assessment.
-
-EVALUATION AREAS (0-100 scale):
-1. Professional Communication (25%): Appropriate formality, politeness, directness
-2. Business Vocabulary (25%): Industry terms, corporate jargon, professional expressions
-3. Clarity & Structure (20%): Organized thoughts, clear main points, logical flow
-4. Meeting & Presentation Skills (15%): Confidence, engagement, persuasiveness
-5. Email/Written Parallels (15%): Formal structures that translate to business writing
-
-SCORING LEVELS:
-90-100: Executive level, ready for C-suite communication
-80-89: Senior professional, can handle complex business scenarios
-70-79: Mid-level professional, effective in standard business contexts
-60-69: Junior professional, needs development in advanced scenarios
-50-59: Entry level, requires significant improvement
-Below 50: Not yet ready for professional business communication
-
-Provide detailed feedback on professional strengths and development areas.
-"""
-
-CASUAL_SYSTEM = """You are a native English speaker evaluating natural, everyday conversation ability.
-
-EVALUATION CRITERIA (0-100 scale):
-1. Natural Flow (30%): Sounds like a real conversation, not scripted/formal
-2. Idioms & Expressions (20%): Uses common sayings, phrasal verbs, colloquialisms
-3. Cultural Awareness (15%): References to culture, current events, shared knowledge
-4. Informal Language (20%): Contractions, slang (appropriate), casual vocabulary
-5. Authenticity (15%): Would pass as native-like in casual settings
-
-SCORING LEVELS:
-90-100: Near-native, sounds completely natural
-80-89: Advanced, very comfortable and natural
-70-79: Upper-intermediate, mostly natural with minor awkwardness
-60-69: Intermediate, understandable but noticeably non-native
-50-59: Basic, struggles with informal contexts
-Below 50: Too formal or limited for casual conversation
-
-Look for: "gonna", "wanna", "kinda", phrasal verbs, natural reactions, filler words (um, like, you know).
-"""
+    return tuple(config_manager.available_modes())
 
 
-TOEFL_EXAMPLES = """
-EXAMPLE 1 (Score 4):
-Q: Describe your hometown.
-A: "I'm from Istanbul, which is a fascinating city that bridges Europe and Asia. It has a rich history dating back thousands of years, with landmarks like the Hagia Sophia and Blue Mosque. The city offers a unique blend of traditional and modern culture, and the food scene is absolutely incredible. I particularly love the vibrant neighborhoods along the Bosphorus."
-Reasoning: Clear delivery, varied vocabulary (fascinating, bridges, landmarks), complex structures, well-organized response with specific details.
+def _evaluation_modes() -> tuple[str, ...]:
+    """Return modes that provide evaluation metadata."""
 
-EXAMPLE 2 (Score 2):
-Q: Describe your hometown.
-A: "My hometown is... um... it's big city. Has many building and people. I like it because... uh... it is nice. Many restaurant and shop there. People is friendly."
-Reasoning: Frequent errors (many building, people is), limited vocabulary, choppy delivery with many hesitations, minimal development.
-"""
-
-IELTS_EXAMPLES = """
-EXAMPLE 1 (Band 8.0):
-Candidate answers fluently with natural linking phrases, uses advanced vocabulary like "resilient workforce" and "strategic foresight", demonstrates accurate complex grammar, and pronunciation is clear with native-like intonation.
-
-EXAMPLE 2 (Band 5.5):
-Candidate hesitates frequently, vocabulary is limited to basic terms, grammar errors ("she go", "he don't"), and pronunciation causes occasional misunderstandings.
-"""
-
-BUSINESS_EXAMPLES = """
-EXAMPLE 1 (Score 92):
-Clear executive presence, uses terms like "stakeholder alignment" and "quarterly runway", structures responses with signposting, and demonstrates confident delivery appropriate for board-level meetings.
-
-EXAMPLE 2 (Score 58):
-Overly informal tone in a leadership context, limited business vocabulary, ideas presented without clear structure, and responses lack persuasive impact.
-"""
-
-CASUAL_EXAMPLES = """
-EXAMPLE 1 (Score 88):
-Speaks with relaxed rhythm, uses idioms such as "hit the nail on the head" and phrasal verbs like "hang out", references popular shows naturally, and sounds spontaneous.
-
-EXAMPLE 2 (Score 52):
-Overly formal phrases, minimal idiom usage, responses feel rehearsed, and limited cultural references make the conversation sound unnatural.
-"""
+    return tuple(
+        mode for mode in _all_modes() if config_manager.has_evaluation_config(mode)
+    )
 
 
-MODE_CONFIG: Dict[str, Dict[str, Any]] = {
-    "toefl": {
-        "system": TOEFL_SYSTEM,
-        "overall_scale": "0-30",
-        "criterion_structure": """{
-    \"delivery\": {\"score\": <number 0-4>, \"max_score\": 4, \"weight\": 0.15},
-    \"language_use\": {\"score\": <number 0-4>, \"max_score\": 4, \"weight\": 0.4},
-    \"topic_development\": {\"score\": <number 0-4>, \"max_score\": 4, \"weight\": 0.45}
-}""",
-        "equivalent_structure": """{
-    \"ielts_band\": <number 0-9>,
-    \"business_score\": <number 0-100>,
-    \"casual_score\": <number 0-100>
-}""",
-        "question_max": 4,
-        "extra_fields": "",
-        "examples": TOEFL_EXAMPLES,
-        "guidance": "Focus on academic tone, cite specific sentences that demonstrate vocabulary precision or organizational clarity, and ensure total TOEFL score is the sum of question scores multiplied by 1.5.",
-    },
-    "ielts": {
-        "system": IELTS_SYSTEM,
-        "overall_scale": "Band 0-9",
-        "criterion_structure": """{
-    \"fluency_coherence\": {\"score\": <number 0-9>, \"max_score\": 9},
-    \"lexical_resource\": {\"score\": <number 0-9>, \"max_score\": 9},
-    \"grammatical_range_accuracy\": {\"score\": <number 0-9>, \"max_score\": 9},
-    \"pronunciation\": {\"score\": <number 0-9>, \"max_score\": 9}
-}""",
-        "equivalent_structure": """{
-    \"toefl_total\": <number 0-30>,
-    \"business_score\": <number 0-100>,
-    \"casual_score\": <number 0-100>
-}""",
-        "question_max": 9,
-        "extra_fields": "",
-        "examples": IELTS_EXAMPLES,
-        "guidance": "Use British/International English spelling, justify each band descriptor with precise evidence, and round the overall band score to the nearest 0.5.",
-    },
-    "business": {
-        "system": BUSINESS_SYSTEM,
-        "overall_scale": "0-100",
-        "criterion_structure": """{
-    \"professional_communication\": {\"score\": <number 0-100>, \"weight\": 0.25},
-    \"business_vocabulary\": {\"score\": <number 0-100>, \"weight\": 0.25},
-    \"clarity_structure\": {\"score\": <number 0-100>, \"weight\": 0.2},
-    \"meeting_skills\": {\"score\": <number 0-100>, \"weight\": 0.15},
-    \"confidence\": {\"score\": <number 0-100>, \"weight\": 0.15}
-}""",
-        "equivalent_structure": """{
-    \"toefl_total\": <number 0-30>,
-    \"ielts_band\": <number 0-9>,
-    \"casual_score\": <number 0-100>
-}""",
-        "question_max": 100,
-        "extra_fields": ",\n    \"professional_level\": \"<Entry/Junior/Mid/Senior/Executive>\",\n    \"recommended_roles\": [\"role1\", \"role2\"],",
-        "examples": BUSINESS_EXAMPLES,
-        "guidance": "Adopt a corporate tone, align feedback with leadership competencies, and explain how the candidate performs in meetings, presentations, and stakeholder updates.",
-    },
-    "casual": {
-        "system": CASUAL_SYSTEM,
-        "overall_scale": "0-100",
-        "criterion_structure": """{
-    \"natural_flow\": {\"score\": <number 0-100>, \"weight\": 0.3},
-    \"idiom_usage\": {\"score\": <number 0-100>, \"weight\": 0.2},
-    \"cultural_awareness\": {\"score\": <number 0-100>, \"weight\": 0.15},
-    \"informal_language\": {\"score\": <number 0-100>, \"weight\": 0.2},
-    \"authenticity\": {\"score\": <number 0-100>, \"weight\": 0.15}
-}""",
-        "equivalent_structure": """{
-    \"toefl_total\": <number 0-30>,
-    \"ielts_band\": <number 0-9>,
-    \"business_score\": <number 0-100>
-}""",
-        "question_max": 100,
-        "extra_fields": ",\n    \"native_likeness\": <number 0-100>,\n    \"idiom_examples\": [\"example1\", \"example2\"],",
-        "examples": CASUAL_EXAMPLES,
-        "guidance": "Focus on informal markers such as contractions, filler words, and cultural references. Highlight idioms or slang that stood out, and comment on how natural the conversation felt.",
-    },
-}
+def _default_mode() -> str:
+    """Return the preferred default interview mode."""
+
+    evaluation_modes = _evaluation_modes()
+    if 'toefl' in evaluation_modes:
+        return 'toefl'
+    if evaluation_modes:
+        return evaluation_modes[0]
+
+    modes = _all_modes()
+    if not modes:  # pragma: no cover - defensive fallback
+        raise RuntimeError('No interview modes are available.')
+    return modes[0]
 
 
-AVAILABLE_FROM_CONFIG = set(config_manager.available_modes())
-VALID_MODES: Tuple[str, ...] = tuple(
-    sorted(set(MODE_CONFIG.keys()) & AVAILABLE_FROM_CONFIG)
-)
-if not VALID_MODES:  # pragma: no cover - defensive fallback
-    VALID_MODES = tuple(sorted(MODE_CONFIG.keys()))
-DEFAULT_MODE = "toefl" if "toefl" in VALID_MODES else VALID_MODES[0]
+def _normalize_mode(mode: str) -> str:
+    """Return a valid mode, falling back to the default if needed."""
+
+    candidate = (mode or '').lower()
+    if config_manager.has_mode(candidate):
+        return candidate
+    return _default_mode()
+
+
+def _normalize_evaluation_mode(mode: str) -> str:
+    """Return an evaluation-ready mode, falling back to the default."""
+
+    candidate = (mode or '').lower()
+    if config_manager.has_evaluation_config(candidate):
+        return candidate
+    return _default_mode()
 
 
 ENV_KEY_NAME = "ANTHROPIC_API_KEY"
@@ -256,15 +92,15 @@ logger = logging.getLogger(__name__)
 def create_evaluation_prompt(transcript: str, mode: str) -> tuple[str, str]:
     """Create Anthropic system and user prompts for the requested evaluation mode."""
 
-    mode_key = mode if mode in MODE_CONFIG else DEFAULT_MODE
-    config = MODE_CONFIG[mode_key]
+    mode_key = _normalize_evaluation_mode(mode)
+    config = config_manager.get_evaluation_config(mode_key)
 
     evaluation_directive = config_manager.get_evaluation_prompt(mode_key)
 
-    system_prompt = config["system"]
+    system_prompt = config["system_prompt"]
     overall_scale = config["overall_scale"]
-    criterion_structure = config["criterion_structure"]
-    equivalent_structure = config["equivalent_structure"]
+    criterion_structure = config["criterion_template"]
+    equivalent_structure = config["equivalent_template"]
     question_max = config["question_max"]
     examples = config["examples"]
     guidance = config["guidance"]
@@ -372,21 +208,25 @@ def _save_api_key(api_key: str) -> None:
     os.environ[ENV_KEY_NAME] = api_key
 
 
-def _get_last_mode(default: str = DEFAULT_MODE) -> str:
+def _get_last_mode(default: str | None = None) -> str:
     """Return the most recently used evaluation mode."""
 
+    fallback = (default or _default_mode()).lower()
     data = _load_env_file()
-    mode = data.get(LAST_MODE_KEY, default)
-    return mode if mode in MODE_CONFIG else default
+    stored = (data.get(LAST_MODE_KEY) or "").lower()
+    if stored and config_manager.has_evaluation_config(stored):
+        return stored
+    return fallback
 
 
 def _save_last_mode(mode: str) -> None:
     """Persist the last used evaluation mode in the .env file."""
 
-    if mode not in MODE_CONFIG:
+    candidate = (mode or "").lower()
+    if not config_manager.has_evaluation_config(candidate):
         return
     data = _load_env_file()
-    data[LAST_MODE_KEY] = mode
+    data[LAST_MODE_KEY] = candidate
     _write_env_file(data)
 
 
@@ -550,7 +390,7 @@ def chat() -> tuple[Any, int]:
 
     if not session_id:
         return jsonify({"error": "session_id gerekli"}), 400
-    if mode not in MODE_CONFIG:
+    if not config_manager.has_mode(mode):
         return jsonify({"error": "Geçersiz mod"}), 400
     if not message:
         return jsonify({"error": "Mesaj boş olamaz"}), 400
@@ -628,12 +468,17 @@ def get_first_question() -> tuple[Any, int]:
 
     data = request.get_json(silent=True) or {}
     session_id = str(data.get("session_id") or "").strip()
-    mode = str(data.get("mode") or DEFAULT_MODE).lower()
+    requested_mode = str(data.get("mode") or "").lower()
 
     if not session_id:
         return jsonify({"error": "session_id gerekli"}), 400
-    if mode not in MODE_CONFIG:
-        return jsonify({"error": "Geçersiz mod"}), 400
+
+    if requested_mode:
+        if not config_manager.has_mode(requested_mode):
+            return jsonify({"error": "Geçersiz mod"}), 400
+        mode = requested_mode
+    else:
+        mode = _default_mode()
 
     question = config_manager.get_random_question(mode)
     conversation = _reset_conversation(session_id, mode)
@@ -657,21 +502,14 @@ def get_first_question() -> tuple[Any, int]:
 def get_modes() -> tuple[Any, int]:
     """Expose available modes with descriptions, criteria and scale."""
 
-    modes = []
-    for mode in VALID_MODES:
-        description = config_manager.get_description(mode)
-        criteria = config_manager.get_criteria(mode)
-        scale = config_manager.get_scale(mode)
-        modes.append(
-            {
-                "mode": mode,
-                "description": description,
-                "criteria": criteria,
-                "scale": scale,
-            }
-        )
+    modes = [config_manager.serialise_mode(mode) for mode in _all_modes()]
+    payload = {
+        "modes": modes,
+        "default_mode": _default_mode(),
+        "evaluation_modes": list(_evaluation_modes()),
+    }
 
-    return jsonify({"modes": modes}), 200
+    return jsonify(payload), 200
 
 
 @app.route("/api/validate-key", methods=["POST"])
@@ -726,7 +564,8 @@ def api_key_status() -> tuple[Any, int]:
             {
                 "has_key": has_key,
                 "last_mode": last_mode,
-                "modes": sorted(VALID_MODES),
+                "modes": list(_evaluation_modes()),
+                "default_mode": _default_mode(),
             }
         ),
         200,
@@ -746,7 +585,7 @@ def evaluate() -> tuple[Any, int]:
         if not api_key or not transcript:
             return jsonify({"error": "API key ve transcript gerekli"}), 400
 
-        if evaluation_mode not in MODE_CONFIG:
+        if not config_manager.has_evaluation_config(evaluation_mode):
             return jsonify({"error": "Geçersiz değerlendirme modu"}), 400
 
         client = anthropic.Anthropic(api_key=api_key)
@@ -782,9 +621,10 @@ def evaluate() -> tuple[Any, int]:
 
         validated = validate_evaluation(evaluation)
         validated.setdefault("mode", evaluation_mode)
-        validated.setdefault(
-            "overall_scale", MODE_CONFIG[evaluation_mode]["overall_scale"]
-        )
+        overall_scale = config_manager.get_evaluation_config(evaluation_mode)[
+            "overall_scale"
+        ]
+        validated.setdefault("overall_scale", overall_scale)
 
         _save_last_mode(evaluation_mode)
 

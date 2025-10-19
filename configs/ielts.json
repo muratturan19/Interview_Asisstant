@@ -8,7 +8,7 @@
       "part": "Part 1 - Introduction and Interview",
       "prompts": [
         "Do you work or study? Why did you choose that field?",
-        "Let’s talk about books. What kind of books do you enjoy reading?",
+        "Let\u2019s talk about books. What kind of books do you enjoy reading?",
         "Tell me about your hometown. What is it known for?"
       ]
     },
@@ -30,20 +30,60 @@
     }
   ],
   "criteria": [
-    {"name": "Fluency and Coherence", "description": "Ability to speak at length with logical organisation and appropriate cohesion."},
-    {"name": "Lexical Resource", "description": "Range and precision of vocabulary used to discuss various topics."},
-    {"name": "Grammatical Range and Accuracy", "description": "Variety and control of grammatical structures."},
-    {"name": "Pronunciation", "description": "Clarity, stress, rhythm, and intonation features of speech."}
+    {
+      "name": "Fluency and Coherence",
+      "description": "Ability to speak at length with logical organisation and appropriate cohesion."
+    },
+    {
+      "name": "Lexical Resource",
+      "description": "Range and precision of vocabulary used to discuss various topics."
+    },
+    {
+      "name": "Grammatical Range and Accuracy",
+      "description": "Variety and control of grammatical structures."
+    },
+    {
+      "name": "Pronunciation",
+      "description": "Clarity, stress, rhythm, and intonation features of speech."
+    }
   ],
   "scale": {
     "label": "IELTS Band",
     "levels": [
-      {"value": 4, "description": "Limited response with frequent breakdowns and basic vocabulary."},
-      {"value": 5, "description": "Generally intelligible with some hesitation and grammatical errors."},
-      {"value": 6, "description": "Willing to speak at length with some mistakes but effective communication."},
-      {"value": 7, "description": "Speaks fluently with occasional repetition and good vocabulary range."},
-      {"value": 8, "description": "Handles complex language well with only occasional inaccuracies."},
-      {"value": 9, "description": "Fully operational command of the language; natural and effortless."}
+      {
+        "value": 4,
+        "description": "Limited response with frequent breakdowns and basic vocabulary."
+      },
+      {
+        "value": 5,
+        "description": "Generally intelligible with some hesitation and grammatical errors."
+      },
+      {
+        "value": 6,
+        "description": "Willing to speak at length with some mistakes but effective communication."
+      },
+      {
+        "value": 7,
+        "description": "Speaks fluently with occasional repetition and good vocabulary range."
+      },
+      {
+        "value": 8,
+        "description": "Handles complex language well with only occasional inaccuracies."
+      },
+      {
+        "value": 9,
+        "description": "Fully operational command of the language; natural and effortless."
+      }
     ]
+  },
+  "evaluation": {
+    "system_prompt": "You are an official IELTS Speaking examiner certified by British Council/IDP.\n\nBAND DESCRIPTORS (0-9 scale, use 0.5 increments):\n\nBand 9 (Expert): Full operational command, appropriate, accurate, and fluent.\nBand 8 (Very Good): Fully operational with occasional inaccuracies.\nBand 7 (Good): Operational command, occasional inaccuracies, some complex language.\nBand 6 (Competent): Effective command despite inaccuracies, can use complex language.\nBand 5 (Modest): Partial command, frequent errors, basic meaning usually clear.\nBand 4 (Limited): Very limited to familiar situations, frequent communication breakdowns.\nBand 3 (Extremely Limited): Conveys only general meaning in familiar situations.\nBand 2-1: Essentially no communication possible.\n\nASSESSMENT CRITERIA (Equal 25% each):\n1. Fluency & Coherence: Flow, linking, self-correction, hesitation\n2. Lexical Resource: Vocabulary range, precision, collocations, paraphrasing\n3. Grammatical Range & Accuracy: Complexity, structures, error-free sentences\n4. Pronunciation: Sounds, word stress, intonation, intelligibility\n\nProvide individual criterion scores and overall band (average, rounded to 0.5).",
+    "overall_scale": "Band 0-9",
+    "criterion_template": "{\n    \"fluency_coherence\": {\"score\": <number 0-9>, \"max_score\": 9},\n    \"lexical_resource\": {\"score\": <number 0-9>, \"max_score\": 9},\n    \"grammatical_range_accuracy\": {\"score\": <number 0-9>, \"max_score\": 9},\n    \"pronunciation\": {\"score\": <number 0-9>, \"max_score\": 9}\n}",
+    "equivalent_template": "{\n    \"toefl_total\": <number 0-30>,\n    \"business_score\": <number 0-100>,\n    \"casual_score\": <number 0-100>\n}",
+    "question_max": 9,
+    "extra_fields": "",
+    "examples": "EXAMPLE 1 (Band 8.0):\nCandidate answers fluently with natural linking phrases, uses advanced vocabulary like \"resilient workforce\" and \"strategic foresight\", demonstrates accurate complex grammar, and pronunciation is clear with native-like intonation.\n\nEXAMPLE 2 (Band 5.5):\nCandidate hesitates frequently, vocabulary is limited to basic terms, grammar errors (\"she go\", \"he don't\"), and pronunciation causes occasional misunderstandings.",
+    "guidance": "Use British/International English spelling, justify each band descriptor with precise evidence, and round the overall band score to the nearest 0.5."
   }
 }
