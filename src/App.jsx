@@ -207,6 +207,7 @@ const ExamplesList = ({ examples }) => {
 
 function App() {
   const sessionId = useMemo(createSessionId, []);
+  const isClient = typeof window !== 'undefined';
   const [modes, setModes] = useState([]);
   const [modeError, setModeError] = useState('');
   const [selectedMode, setSelectedMode] = useState('');
@@ -241,20 +242,19 @@ function App() {
     });
   }, []);
 
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(false);
-  const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [interviewStatus, setInterviewStatus] = useState({ type: '', text: '' });
   const [micState, setMicState] = useState('disabled');
-  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
+  const [isSpeechSupported, setIsSpeechSupported] = useState(() =>
+    isClient ? null : true,
+  );
+  const [speechSupportChecked, setSpeechSupportChecked] = useState(() => !isClient);
   const [canSpeak, setCanSpeak] = useState(false);
   const canSpeakRef = useRef(false);
   const [interviewActive, setInterviewActive] = useState(false);
   const [interviewFinished, setInterviewFinished] = useState(false);
 
-  const [evaluationTranscript, setEvaluationTranscript] = useState('');
-  const [evaluationTouched, setEvaluationTouched] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState(null);
   const [evaluationError, setEvaluationError] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -269,6 +269,7 @@ function App() {
     () => !hasStoredApiKey && !apiKey.trim(),
     [apiKey, hasStoredApiKey],
   );
+  const speechEnabled = isSpeechSupported === true;
 
   const updateStatus = useCallback((type, text) => {
     setInterviewStatus({ type, text });
@@ -413,7 +414,8 @@ function App() {
         return false;
       }
 
-      const transcriptSource = transcriptOverride ?? evaluationTranscript;
+      const transcriptSource =
+        transcriptOverride ?? formatHistoryForTranscript(chatHistoryRef.current);
       const transcript = transcriptSource.trim();
 
       if (!transcript) {
@@ -429,10 +431,6 @@ function App() {
 
       setIsEvaluating(true);
       setEvaluationError('');
-      if (transcriptOverride) {
-        setEvaluationTranscript(transcript);
-        setEvaluationTouched(false);
-      }
 
       try {
         const payload = {
@@ -472,7 +470,7 @@ function App() {
         setIsEvaluating(false);
       }
     },
-    [apiKey, evaluationReady, evaluationTranscript, hasStoredApiKey, selectedMode, updateStatus]
+    [apiKey, evaluationReady, hasStoredApiKey, selectedMode, updateStatus]
   );
 
   const finalizeInterview = useCallback(
@@ -572,7 +570,6 @@ function App() {
       updateChatHistory(historyAfterUser);
 
       setError('');
-      setIsSendingMessage(true);
       if (fromVoice) {
         updateStatus('', '🧠 Yanıt gönderiliyor...');
       }
@@ -615,12 +612,12 @@ function App() {
 
         if (data.limit_reached || data.remaining_pairs === 0) {
           await finalizeInterview(fullHistory);
-        } else if (isSpeechSupported) {
+        } else if (speechEnabled) {
           readyMicrophone();
         } else {
           updateStatus(
-            'info',
-            '✍️ Mikrofon desteği yok. Yanıtınızı yazarak iletmeye devam edin.'
+            'error',
+            'Tarayıcınız mikrofon desteği sunmuyor. Lütfen Chrome veya Edge kullanın.'
           );
         }
 
@@ -638,8 +635,6 @@ function App() {
         }
         updateChatHistory((prev) => prev.slice(0, -1));
         return false;
-      } finally {
-        setIsSendingMessage(false);
       }
     },
     [
@@ -647,10 +642,10 @@ function App() {
       finalizeInterview,
       hasStoredApiKey,
       interviewActive,
-      isSpeechSupported,
       readyMicrophone,
       selectedMode,
       sessionId,
+      speechEnabled,
       speakLatestAssistantMessage,
       updateChatHistory,
       updateStatus,
@@ -658,6 +653,13 @@ function App() {
   );
 
   const handleStartInterview = useCallback(async () => {
+    if (!speechEnabled) {
+      updateStatus(
+        'error',
+        'Tarayıcınız mikrofon desteği sunmuyor. Lütfen Chrome veya Edge kullanın.',
+      );
+      return;
+    }
     if (!selectedMode) {
       setError('Lütfen bir mod seçin.');
       return;
@@ -674,13 +676,10 @@ function App() {
     updateStatus('', '🎙️ Asistan ilk soruyu hazırlıyor...');
     setInterviewFinished(false);
     setEvaluationResult(null);
-    setEvaluationTranscript('');
-    setEvaluationTouched(false);
     setRemainingPairs(null);
     setCurrentQuestion(null);
     updateChatHistory([]);
     lastSpokenSignatureRef.current = '';
-    setMessage('');
     listeningEnabledRef.current = false;
     setMicState('disabled');
 
@@ -711,18 +710,8 @@ function App() {
         speakLatestAssistantMessage(initialHistory);
       }
 
-      if (isSpeechSupported) {
+      if (speechEnabled) {
         readyMicrophone();
-      } else if (canSpeakRef.current) {
-        updateStatus(
-          'info',
-          'Sorular sesli okunuyor. Mikrofon desteği yok, yanıtınızı yazarak iletin.'
-        );
-      } else {
-        updateStatus(
-          'info',
-          '✍️ Mikrofon desteği yok. Yanıtınızı yazarak iletmeye devam edin.'
-        );
       }
     } catch (err) {
       const messageText = err instanceof Error ? err.message : 'İlk soru alınamadı.';
@@ -733,18 +722,18 @@ function App() {
       setIsLoadingQuestion(false);
     }
   }, [
-    isSpeechSupported,
     missingApiKey,
     readyMicrophone,
     selectedMode,
     sessionId,
+    speechEnabled,
     speakLatestAssistantMessage,
     updateChatHistory,
     updateStatus,
   ]);
 
   const handleMicButtonClick = useCallback(async () => {
-    if (!isSpeechSupported) {
+    if (!speechEnabled) {
       return;
     }
     if (isListeningRef.current) {
@@ -755,18 +744,7 @@ function App() {
       return;
     }
     await startListening();
-  }, [isSpeechSupported, startListening]);
-
-  const handleSendMessage = useCallback(
-    async (event) => {
-      event.preventDefault();
-      const success = await sendMessageToChat(message, { fromVoice: false });
-      if (success) {
-        setMessage('');
-      }
-    },
-    [message, sendMessageToChat]
-  );
+  }, [speechEnabled, startListening]);
 
   const handleSelectMode = (event) => {
     const nextMode = event.target.value;
@@ -775,17 +753,10 @@ function App() {
     setRemainingPairs(null);
     updateChatHistory([]);
     setEvaluationResult(null);
-    setEvaluationTranscript('');
-    setEvaluationTouched(false);
     setInterviewActive(false);
     setInterviewFinished(false);
     setError('');
     updateStatus('info', 'Yeni mod seçildi. Mikrofonla yanıtlamak için mülakatı başlatın.');
-  };
-
-  const handleTranscriptChange = (event) => {
-    setEvaluationTranscript(event.target.value);
-    setEvaluationTouched(true);
   };
 
   const handleSaveApiKey = async () => {
@@ -816,7 +787,7 @@ function App() {
 
   const micCopy = MIC_STATE_COPY[micState] || MIC_STATE_COPY.disabled;
   const micButtonDisabled =
-    !isSpeechSupported ||
+    !speechEnabled ||
     !interviewActive ||
     interviewFinished ||
     (micState !== 'ready' && micState !== 'listening');
@@ -942,6 +913,7 @@ function App() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setIsSpeechSupported(false);
+      setSpeechSupportChecked(true);
       return () => {
         window.speechSynthesis?.cancel();
       };
@@ -1019,6 +991,7 @@ function App() {
 
     recognitionRef.current = recognition;
     setIsSpeechSupported(true);
+    setSpeechSupportChecked(true);
 
     return () => {
       recognition.removeEventListener('result', handleResult);
@@ -1028,12 +1001,6 @@ function App() {
       window.speechSynthesis?.cancel();
     };
   }, [ensureVoices, sendMessageToChat, updateStatus]);
-
-  useEffect(() => {
-    if (!evaluationTouched) {
-      setEvaluationTranscript(formatHistoryForTranscript(chatHistory));
-    }
-  }, [chatHistory, evaluationTouched]);
 
   useEffect(() => {
     if (!currentQuestion?.prompt) {
@@ -1052,16 +1019,42 @@ function App() {
     }
   }, [canSpeak, speakLatestAssistantMessage]);
 
+  const transcriptPreview = useMemo(
+    () => formatHistoryForTranscript(chatHistory),
+    [chatHistory],
+  );
+
   const micHint = micCopy.hint;
+
+  const pageHeader = (
+    <header>
+      <h1>Interview Assistant</h1>
+      <p className="subtitle">
+        Sesli mülakat başlatın, yanıtlarınızı mikrofonla kaydedin ve konuşmanızı değerlendirin.
+      </p>
+    </header>
+  );
+
+  if (speechSupportChecked && !speechEnabled) {
+    return (
+      <div className="page">
+        {pageHeader}
+        <main>
+          <section className="card warning">
+            <h2>Mikrofon Desteği Gerekiyor</h2>
+            <p>
+              Bu uygulama yalnızca Web Speech API desteği sunan tarayıcılarda çalışır. Lütfen
+              Chrome veya Edge kullanın.
+            </p>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
-      <header>
-        <h1>Interview Assistant</h1>
-        <p className="subtitle">
-          Sesli mülakat başlatın, yanıtlarınızı mikrofonla kaydedin ve konuşmanızı değerlendirin.
-        </p>
-      </header>
+      {pageHeader}
 
       <main>
         <section className="card">
@@ -1146,7 +1139,9 @@ function App() {
             <button
               type="button"
               onClick={handleStartInterview}
-              disabled={isLoadingQuestion || !selectedMode || missingApiKey}
+              disabled={
+                isLoadingQuestion || !selectedMode || missingApiKey || !speechEnabled
+              }
             >
               {isLoadingQuestion ? 'Yükleniyor...' : 'İlk Soruyu Al'}
             </button>
@@ -1172,7 +1167,7 @@ function App() {
             </div>
           )}
 
-          {isSpeechSupported ? (
+          {speechEnabled ? (
             <div className="mic-controls">
               <button
                 type="button"
@@ -1185,28 +1180,14 @@ function App() {
               <span className="mic-hint">{micHint}</span>
             </div>
           ) : (
-            <p className="status info">
-              Tarayıcınız mikrofon desteği sunmuyor. Yanıtlarınızı yazarak gönderebilirsiniz.
-            </p>
+            <p className="status info">Mikrofon yetenekleri kontrol ediliyor...</p>
           )}
 
-          {isSpeechSupported ? (
+          {speechEnabled && (
             <p className="status info">
               Mikrofon etkin. Yanıtınızı konuşarak iletin ve kayıt için mikrofon düğmesini
               kullanın.
             </p>
-          ) : (
-            <form className="chat-form" onSubmit={handleSendMessage}>
-              <textarea
-                rows={4}
-                placeholder="Mikrofon desteği bulunamadı. Yanıtınızı buraya yazarak iletebilirsiniz."
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-              />
-              <button type="submit" disabled={isSendingMessage}>
-                {isSendingMessage ? 'Gönderiliyor...' : 'Mesaj Gönder'}
-              </button>
-            </form>
           )}
 
           <HistoryView history={chatHistory} />
@@ -1215,28 +1196,20 @@ function App() {
         <section className="card">
           <div className="section-header">
             <h2>4. Değerlendirme</h2>
-            <button
-              type="button"
-              onClick={() => {
-                setEvaluationTranscript(formatHistoryForTranscript(chatHistory));
-                setEvaluationTouched(false);
-              }}
-              disabled={!chatHistory.length}
-            >
-              Sohbeti Aktar
-            </button>
           </div>
           {evaluationError && <p className="error">{evaluationError}</p>}
-          <textarea
-            rows={8}
-            placeholder="Transkripti buraya yapıştırın veya Sohbeti Aktar ile otomatik doldurun."
-            value={evaluationTranscript}
-            onChange={handleTranscriptChange}
-          />
+          <div className="transcript-preview">
+            <h3>Otomatik Transcript</h3>
+            {transcriptPreview ? (
+              <pre>{transcriptPreview}</pre>
+            ) : (
+              <p className="muted">Transcript oluşturmak için önce sohbeti başlatın.</p>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => handleEvaluate()}
-            disabled={isEvaluating || !evaluationReady}
+            disabled={isEvaluating || !evaluationReady || !chatHistory.length}
           >
             {isEvaluating ? 'Değerlendiriliyor...' : 'Değerlendir'}
           </button>
