@@ -229,10 +229,14 @@ function App() {
   const [remainingPairs, setRemainingPairs] = useState(null);
   const [chatHistory, setChatHistory] = useState([]);
   const chatHistoryRef = useRef([]);
+  const lastSpokenSignatureRef = useRef('');
   const updateChatHistory = useCallback((updater) => {
     setChatHistory((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
       chatHistoryRef.current = next;
+      if (!next.length) {
+        lastSpokenSignatureRef.current = '';
+      }
       return next;
     });
   }, []);
@@ -261,6 +265,10 @@ function App() {
   const recognitionCapturedRef = useRef(false);
   const recognitionErrorRef = useRef(false);
   const microphonePermissionRef = useRef(false);
+  const missingApiKey = useMemo(
+    () => !hasStoredApiKey && !apiKey.trim(),
+    [apiKey, hasStoredApiKey],
+  );
 
   const updateStatus = useCallback((type, text) => {
     setInterviewStatus({ type, text });
@@ -295,6 +303,32 @@ function App() {
       window.speechSynthesis.speak(utterance);
     });
   }, []);
+
+  const speakLatestAssistantMessage = useCallback(
+    (historyOverride) => {
+      if (!canSpeakRef.current) {
+        return;
+      }
+
+      const historyToUse = historyOverride ?? chatHistoryRef.current;
+      for (let index = historyToUse.length - 1; index >= 0; index -= 1) {
+        const entry = historyToUse[index];
+        if (entry.role !== 'assistant' || !entry.content) {
+          continue;
+        }
+
+        const signature = `${index}:${entry.content}`;
+        if (lastSpokenSignatureRef.current === signature) {
+          return;
+        }
+
+        lastSpokenSignatureRef.current = signature;
+        speakText(entry.content);
+        return;
+      }
+    },
+    [speakText],
+  );
 
   const handleEvaluate = useCallback(
     async ({ transcriptOverride, autoTriggered = false } = {}) => {
@@ -505,7 +539,7 @@ function App() {
           updateChatHistory(fullHistory);
           setCurrentQuestion({ prompt: data.reply });
           updateStatus('', '🔊 Asistan konuşuyor...');
-          await speakText(data.reply);
+          speakLatestAssistantMessage(fullHistory);
         }
 
         if (data.limit_reached || data.remaining_pairs === 0) {
@@ -537,12 +571,30 @@ function App() {
         setIsSendingMessage(false);
       }
     },
-    [apiKey, finalizeInterview, hasStoredApiKey, interviewActive, isSpeechSupported, readyMicrophone, selectedMode, sessionId, speakText, updateChatHistory, updateStatus]
+    [
+      apiKey,
+      finalizeInterview,
+      hasStoredApiKey,
+      interviewActive,
+      isSpeechSupported,
+      readyMicrophone,
+      selectedMode,
+      sessionId,
+      speakLatestAssistantMessage,
+      updateChatHistory,
+      updateStatus,
+    ]
   );
 
   const handleStartInterview = useCallback(async () => {
     if (!selectedMode) {
       setError('Lütfen bir mod seçin.');
+      return;
+    }
+
+    if (missingApiKey) {
+      setError('Anthropic API key olmadan görüşme başlatılamaz.');
+      setInterviewActive(false);
       return;
     }
 
@@ -556,6 +608,7 @@ function App() {
     setRemainingPairs(null);
     setCurrentQuestion(null);
     updateChatHistory([]);
+    lastSpokenSignatureRef.current = '';
     setMessage('');
     listeningEnabledRef.current = false;
     setMicState('disabled');
@@ -584,7 +637,7 @@ function App() {
 
       if (data.question) {
         updateStatus('', '🔊 Asistan konuşuyor...');
-        await speakText(data.question);
+        speakLatestAssistantMessage(initialHistory);
       }
 
       if (isSpeechSupported) {
@@ -608,7 +661,16 @@ function App() {
     } finally {
       setIsLoadingQuestion(false);
     }
-  }, [isSpeechSupported, readyMicrophone, selectedMode, sessionId, speakText, updateChatHistory, updateStatus]);
+  }, [
+    isSpeechSupported,
+    missingApiKey,
+    readyMicrophone,
+    selectedMode,
+    sessionId,
+    speakLatestAssistantMessage,
+    updateChatHistory,
+    updateStatus,
+  ]);
 
   const handleMicButtonClick = useCallback(async () => {
     if (!isSpeechSupported) {
@@ -901,6 +963,16 @@ function App() {
     }
   }, [chatHistory, evaluationTouched]);
 
+  useEffect(() => {
+    speakLatestAssistantMessage(chatHistory);
+  }, [chatHistory, speakLatestAssistantMessage]);
+
+  useEffect(() => {
+    if (canSpeak) {
+      speakLatestAssistantMessage();
+    }
+  }, [canSpeak, speakLatestAssistantMessage]);
+
   const micHint = micCopy.hint;
 
   return (
@@ -983,6 +1055,11 @@ function App() {
           {hasStoredApiKey && (
             <p className="status info">Sunucuda kayıtlı anahtar otomatik olarak kullanılacak.</p>
           )}
+          {missingApiKey && (
+            <p className="status error">
+              Mülakatı başlatmak için geçerli bir Anthropic API anahtarı gereklidir.
+            </p>
+          )}
         </section>
 
         <section className="card">
@@ -991,7 +1068,7 @@ function App() {
             <button
               type="button"
               onClick={handleStartInterview}
-              disabled={isLoadingQuestion || !selectedMode}
+              disabled={isLoadingQuestion || !selectedMode || missingApiKey}
             >
               {isLoadingQuestion ? 'Yükleniyor...' : 'İlk Soruyu Al'}
             </button>
