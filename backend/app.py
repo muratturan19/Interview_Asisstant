@@ -480,9 +480,34 @@ def get_first_question() -> tuple[Any, int]:
     else:
         mode = _default_mode()
 
-    question = config_manager.get_random_question(mode)
-    conversation = _reset_conversation(session_id, mode)
-    conversation["pending_question"] = question["prompt"]
+    try:
+        question = config_manager.get_random_question(mode)
+        conversation = _reset_conversation(session_id, mode)
+    except ValueError as exc:
+        logger.error(
+            "Failed to prepare first question for mode '%s': %s", mode, exc
+        )
+        return jsonify({"error": str(exc)}), 500
+    except Exception as exc:  # pragma: no cover - defensive fallback
+        logger.exception(
+            "Unexpected error while preparing first question for mode '%s'", mode
+        )
+        return (
+            jsonify({"error": "İlk soru hazırlanırken bir hata oluştu."}),
+            500,
+        )
+
+    prompt = question.get("prompt") if isinstance(question, dict) else None
+    if not isinstance(prompt, str) or not prompt.strip():
+        logger.error(
+            "Invalid question payload for mode '%s': %r", mode, question
+        )
+        return (
+            jsonify({"error": "Geçerli bir soru alınamadı."}),
+            500,
+        )
+
+    conversation["pending_question"] = prompt
 
     return (
         jsonify(
