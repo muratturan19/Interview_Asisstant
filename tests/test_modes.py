@@ -95,3 +95,27 @@ def test_modes_endpoint_includes_runtime_mode(monkeypatch: pytest.MonkeyPatch, t
     assert "runtime" in mode_ids
     assert payload["default_mode"] == "runtime"
     assert "runtime" in payload["evaluation_modes"]
+
+
+def test_get_first_question_returns_json_error_on_config_issue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Configuration failures should return a JSON error payload."""
+
+    client = backend_module.app.test_client()
+
+    def _broken_question(_mode: str) -> None:
+        raise ValueError("Mode 'broken' does not provide any questions.")
+
+    monkeypatch.setattr(
+        backend_module.config_manager, "get_random_question", _broken_question
+    )
+
+    response = client.post(
+        "/api/get-first-question", json={"session_id": "abc", "mode": "toefl"}
+    )
+
+    assert response.status_code == 500
+    assert response.is_json
+    payload = response.get_json()
+    assert payload["error"] == "Mode 'broken' does not provide any questions."
