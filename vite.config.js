@@ -18,7 +18,7 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: 'interview.html',
+      input: 'index.html',
     },
   },
 });
