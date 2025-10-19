@@ -190,6 +190,21 @@ button.secondary:not(:disabled):hover {
   color: #94a3b8;
 }
 
+.toggle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  font-size: 0.95rem;
+  color: #cbd5f5;
+}
+
+.toggle-row input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #38bdf8;
+}
+
 .scale-card {
   border-radius: 18px;
   border: 1px solid rgba(148, 163, 184, 0.25);
