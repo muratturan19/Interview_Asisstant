@@ -258,6 +258,8 @@ function App() {
   const [evaluationError, setEvaluationError] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
 
+  const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(false);
+
   const recognitionRef = useRef(null);
   const listeningEnabledRef = useRef(false);
   const isListeningRef = useRef(false);
@@ -971,7 +973,7 @@ function App() {
   }, [ensureVoices, sendMessageToChat, updateStatus]);
 
   useEffect(() => {
-    if (!canSpeakRef.current || chatHistory.length === 0) {
+    if (!autoSpeakEnabled || !canSpeakRef.current || chatHistory.length === 0) {
       return;
     }
 
@@ -992,7 +994,30 @@ function App() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [chatHistory, speakText]);
+  }, [autoSpeakEnabled, chatHistory, speakText]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const stored = window.localStorage.getItem('autoSpeakEnabled');
+    if (stored === 'true') {
+      setAutoSpeakEnabled(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem('autoSpeakEnabled', autoSpeakEnabled ? 'true' : 'false');
+
+    if (!autoSpeakEnabled) {
+      window.speechSynthesis?.cancel();
+    }
+  }, [autoSpeakEnabled]);
 
   const transcriptPreview = useMemo(
     () => formatHistoryForTranscript(chatHistory),
@@ -1163,6 +1188,17 @@ function App() {
               Mikrofon etkin. Yanıtınızı konuşarak iletin ve kayıt için mikrofon düğmesini
               kullanın.
             </p>
+          )}
+
+          {speechEnabled && (
+            <label className="toggle-row">
+              <input
+                type="checkbox"
+                checked={autoSpeakEnabled}
+                onChange={(event) => setAutoSpeakEnabled(event.target.checked)}
+              />
+              <span>Asistan yanıtları sesli okusun</span>
+            </label>
           )}
 
           <HistoryView history={chatHistory} />
