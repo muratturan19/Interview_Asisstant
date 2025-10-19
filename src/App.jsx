@@ -260,7 +260,7 @@ function App() {
   }, []);
 
   const readyMicrophone = useCallback(
-    (text = '🎤 Dinliyorum... başlamak için mikrofon butonuna tıklayın.') => {
+    (text = '🎤 Mikrofon hazır. Hazır olduğunuzda konuşmaya başlayın.') => {
       listeningEnabledRef.current = true;
       recognitionCapturedRef.current = false;
       recognitionErrorRef.current = false;
@@ -506,7 +506,10 @@ function App() {
         } else if (isSpeechSupported) {
           readyMicrophone();
         } else {
-          updateStatus('', '');
+          updateStatus(
+            'info',
+            '✍️ Mikrofon desteği yok. Yanıtınızı yazarak iletmeye devam edin.'
+          );
         }
 
         return true;
@@ -538,7 +541,7 @@ function App() {
 
     setIsLoadingQuestion(true);
     setError('');
-    updateStatus('', '');
+    updateStatus('', '🎙️ Asistan ilk soruyu hazırlıyor...');
     setInterviewFinished(false);
     setEvaluationResult(null);
     setEvaluationTranscript('');
@@ -580,9 +583,15 @@ function App() {
       if (isSpeechSupported) {
         readyMicrophone();
       } else if (canSpeakRef.current) {
-        updateStatus('info', 'Sorular sesli okunuyor. Yanıtlarınızı yazarak gönderebilirsiniz.');
+        updateStatus(
+          'info',
+          'Sorular sesli okunuyor. Mikrofon desteği yok, yanıtınızı yazarak iletin.'
+        );
       } else {
-        updateStatus('', '');
+        updateStatus(
+          'info',
+          '✍️ Mikrofon desteği yok. Yanıtınızı yazarak iletmeye devam edin.'
+        );
       }
     } catch (err) {
       const messageText = err instanceof Error ? err.message : 'İlk soru alınamadı.';
@@ -631,7 +640,7 @@ function App() {
     setInterviewActive(false);
     setInterviewFinished(false);
     setError('');
-    updateStatus('', '');
+    updateStatus('info', 'Yeni mod seçildi. Mikrofonla yanıtlamak için mülakatı başlatın.');
   };
 
   const handleTranscriptChange = (event) => {
@@ -1016,17 +1025,24 @@ function App() {
             </p>
           )}
 
-          <form className="chat-form" onSubmit={handleSendMessage}>
-            <textarea
-              rows={4}
-              placeholder="Yanıtınızı yazın veya mikrofon ile kaydedin..."
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-            />
-            <button type="submit" disabled={isSendingMessage}>
-              {isSendingMessage ? 'Gönderiliyor...' : 'Mesaj Gönder'}
-            </button>
-          </form>
+          {isSpeechSupported ? (
+            <p className="status info">
+              Mikrofon etkin. Yanıtınızı konuşarak iletin ve kayıt için mikrofon düğmesini
+              kullanın.
+            </p>
+          ) : (
+            <form className="chat-form" onSubmit={handleSendMessage}>
+              <textarea
+                rows={4}
+                placeholder="Mikrofon desteği bulunamadı. Yanıtınızı buraya yazarak iletebilirsiniz."
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+              />
+              <button type="submit" disabled={isSendingMessage}>
+                {isSendingMessage ? 'Gönderiliyor...' : 'Mesaj Gönder'}
+              </button>
+            </form>
+          )}
 
           <HistoryView history={chatHistory} />
         </section>
