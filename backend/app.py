@@ -9,10 +9,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import anthropic
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, redirect, request
 from flask_cors import CORS
 
 from configs import config_manager
+from . import portal_sso
 
 
 # ---------------------------------------------------------------------------
@@ -661,6 +662,32 @@ def evaluate() -> tuple[Any, int]:
         return jsonify({"error": str(exc)}), 500
     except Exception as exc:  # pragma: no cover - defensive
         return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/sso/login", methods=["POST"])
+def sso_login() -> Any:
+    """Portal SSO entry point.
+
+    Expects a form field ``token`` containing the RS256 JWT issued by the
+    Portal.  On success, redirects to the frontend with query params that
+    the React app can persist as the active session.
+    """
+    if request.is_json:
+        token = (request.json or {}).get("token", "")
+    else:
+        token = request.form.get("token", "")
+    if not token:
+        return jsonify({"error": "token required"}), 400
+
+    try:
+        payload = portal_sso.validate_token(token)
+    except Exception as exc:  # jwt.PyJWTError or requests errors
+        logger.warning("SSO token validation failed: %s", exc)
+        return jsonify({"error": "invalid or expired token"}), 401
+
+    tenant_slug = payload.get("tenant_slug", "")
+    redirect_url = f"/?access_token={token}&tenant_slug={tenant_slug}"
+    return redirect(redirect_url, code=302)
 
 
 @app.route("/health", methods=["GET"])

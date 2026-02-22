@@ -1,0 +1,50 @@
+services:
+  interview-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: interview_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - FLASK_ENV=production
+    networks:
+      - interview_internal
+    labels:
+      - "traefik.enable=false"
+
+  interview-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: interview_frontend
+    restart: unless-stopped
+    depends_on:
+      - interview-backend
+    networks:
+      - web
+      - interview_internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+
+      # --- HTTPS router ---
+      - "traefik.http.routers.interview-frontend.rule=Host(`interview.kolektif360.com`)"
+      - "traefik.http.routers.interview-frontend.entrypoints=websecure"
+      - "traefik.http.routers.interview-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.interview-frontend.priority=10"
+      - "traefik.http.services.interview-frontend.loadbalancer.server.port=80"
+
+      # --- HTTP → HTTPS redirect ---
+      - "traefik.http.routers.interview-frontend-http.rule=Host(`interview.kolektif360.com`)"
+      - "traefik.http.routers.interview-frontend-http.entrypoints=web"
+      - "traefik.http.routers.interview-frontend-http.middlewares=interview-https-redirect"
+      - "traefik.http.middlewares.interview-https-redirect.redirectscheme.scheme=https"
+
+networks:
+  web:
+    external: true
+  interview_internal:
+    driver: bridge
